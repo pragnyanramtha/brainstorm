@@ -60,6 +60,8 @@ export function useChat(projectId: string | null): UseChatReturn {
                         }]);
                         setStatus(null);
                         setClarificationQuestions(null);
+                        setApproachProposals(null);
+                        setApproachContextSummary(null);
                         break;
 
                     case 'clarification':
