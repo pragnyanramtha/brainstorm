@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Alternative entry point for Middle Manager AI backend.
+Alternative entry point for Brainstorm AI backend.
 Run this file to start the backend server.
 """
 import os
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     import uvicorn
     from backend.config import ServerConfig
     
-    print("🚀 Starting Middle Manager AI Backend...")
+    print("🚀 Starting Brainstorm AI Backend...")
     print(f"📍 Server will be available at http://{ServerConfig.HOST}:{ServerConfig.PORT}")
     print(f"📖 API docs at http://{ServerConfig.HOST}:{ServerConfig.PORT}/docs")
     

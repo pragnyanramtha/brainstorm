@@ -234,11 +234,6 @@ async def process_message(
                 # Derive project name from intent
                 project_name = intake.get("interpreted_intent", "project")[:60]
 
-                async def scaffold_status(state, detail):
-                    yield_data = {"type": "status", "state": state, "detail": detail}
-                    # Can't yield from nested callback, so we track status via websocket directly
-                    pass
-
                 yield {"type": "status", "state": "scaffolding", "detail": f"Creating project with {len(candidate_files)} files..."}
 
                 scaffold_result = await scaffold_project(

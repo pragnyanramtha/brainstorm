@@ -1,4 +1,4 @@
-# Middle Manager AI - App Bundle
+# Brainstorm AI - App Bundle
 
 ## Running the Backend
 
@@ -33,7 +33,7 @@ All commands will start the server at `http://localhost:3847` with API docs at `
    # Edit .env to add GEMINI_API_KEY
    
    # Run the executable
-   dist/MiddleManagerAI.exe
+   dist/BrainstormAI.exe
    ```
 
 ### Option 2: Docker (For cross-platform deployment)
@@ -54,8 +54,8 @@ CMD ["python", "main.py"]
 
 Build and run:
 ```bash
-docker build -t middle-manager-ai .
-docker run -p 3847:3847 -v $(pwd)/.env:/app/.env middle-manager-ai
+docker build -t brainstorm-ai .
+docker run -p 3847:3847 -v $(pwd)/.env:/app/.env brainstorm-ai
 ```
 
 ### Option 3: Electron Desktop App
@@ -68,7 +68,7 @@ For a full desktop app experience with GUI:
 ## Distribution
 
 The PyInstaller approach creates:
-- **Single executable**: `dist/MiddleManagerAI.exe`
+- **Single executable**: `dist/BrainstormAI.exe`
 - **Cross-platform**: Works on Windows, Mac, Linux
 - **No Python required**: End users don't need Python installed
 - **Portable**: Just copy the .exe file

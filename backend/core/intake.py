@@ -31,7 +31,7 @@ class IntakeAnalysis(BaseModel):
     requires_brainstorming: bool = False
 
 
-INTAKE_SYSTEM_PROMPT = """You are an intent analysis engine for an AI middleware system called Middle Manager AI.
+INTAKE_SYSTEM_PROMPT = """You are an intent analysis engine for an AI middleware system called Brainstorm AI.
 Your job is to deeply analyze a user's message and determine what they ACTUALLY want — not just what they literally said.
 
 You must return a JSON object with these exact fields:

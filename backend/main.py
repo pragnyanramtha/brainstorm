@@ -1,5 +1,5 @@
 """
-FastAPI application entry point for Middle Manager AI.
+FastAPI application entry point for Brainstorm AI.
 Handles startup, shutdown, and serves the built frontend.
 """
 import os
@@ -27,7 +27,7 @@ console = Console()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
-    console.print("[bold green]🚀 Starting Middle Manager AI...[/bold green]")
+    console.print("[bold green]🚀 Starting Brainstorm AI...[/bold green]")
 
     # Initialize database
     await init_db()
@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Middle Manager AI",
+    title="Brainstorm AI",
     description="Intelligent middleware between humans and AI models",
     version="0.1.0",
     lifespan=lifespan,

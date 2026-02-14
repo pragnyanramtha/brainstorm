@@ -1,5 +1,5 @@
 """
-SQLAlchemy setup, engine, async session, and all table models for Middle Manager AI.
+SQLAlchemy setup, engine, async session, and all table models for Brainstorm AI.
 """
 import datetime
 import json

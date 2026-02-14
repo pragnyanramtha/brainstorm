@@ -1,4 +1,4 @@
-# Middle Manager AI
+# Brainstorm AI
 
 A local-first, intelligent middleware between you and AI models.
 

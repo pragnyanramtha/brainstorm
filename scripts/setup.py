@@ -138,7 +138,7 @@ def build_frontend():
 
 def main():
     print("=" * 50)
-    print("  Middle Manager AI — Setup")
+    print("  Brainstorm AI — Setup")
     print("=" * 50)
     print()
 

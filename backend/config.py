@@ -1,5 +1,5 @@
 """
-Settings, paths, constants, and API key management for Middle Manager AI.
+Settings, paths, constants, and API key management for Brainstorm AI.
 """
 import os
 import json
@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 BACKEND_DIR = Path(__file__).parent.resolve()
 WORKSPACE_DIR = PROJECT_ROOT / "workspace"
-DB_PATH = WORKSPACE_DIR / ".middle-manager.db"
+DB_PATH = WORKSPACE_DIR / ".brainstorm.db"
 ENV_PATH = WORKSPACE_DIR / ".env"
 FRONTEND_DIST_DIR = PROJECT_ROOT / "frontend" / "dist"
 

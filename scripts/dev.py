@@ -27,7 +27,7 @@ def get_python():
 
 def main():
     print("=" * 50)
-    print("  Middle Manager AI — Dev Server")
+    print("  Brainstorm AI — Dev Server")
     print("=" * 50)
     print()
 

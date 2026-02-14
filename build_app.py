@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build script to bundle Middle Manager AI into a standalone executable.
+Build script to bundle Brainstorm AI into a standalone executable.
 Uses PyInstaller to create a single executable file.
 """
 import os
@@ -25,7 +25,7 @@ def build_executable():
     cmd = [
         "pyinstaller",
         "--onefile",  # Create single executable
-        "--name", "MiddleManagerAI",
+        "--name", "BrainstormAI",
         "--add-data", ".env.example;.",  # Include env template
         "--add-data", "backend;backend",  # Include backend module
         "--add-data", "scripts;scripts",  # Include scripts
@@ -44,10 +44,10 @@ def build_executable():
     try:
         subprocess.check_call(cmd)
         print("✅ Build completed successfully!")
-        print(f"📦 Executable created: {Path('dist/MiddleManagerAI.exe').absolute()}")
+        print(f"📦 Executable created: {Path('dist/BrainstormAI.exe').absolute()}")
         print("\nTo run the app:")
         print("1. Copy .env.example to .env and add your API keys")
-        print("2. Run: dist/MiddleManagerAI.exe")
+        print("2. Run: dist/BrainstormAI.exe")
     except subprocess.CalledProcessError as e:
         print(f"❌ Build failed: {e}")
         return False
@@ -56,7 +56,7 @@ def build_executable():
 
 def main():
     """Main build process."""
-    print("🚀 Middle Manager AI - App Builder")
+    print("🚀 Brainstorm AI - App Builder")
     print("=" * 50)
     
     # Check if we're in the right directory
