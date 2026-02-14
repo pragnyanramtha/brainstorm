@@ -497,13 +497,26 @@ SEED_SKILLS = [
 
 
 async def seed_skills(session: AsyncSession):
-    """Seed skills table if empty."""
+    """Seed skills table if empty, and add any new skills that are missing."""
     result = await session.execute(select(Skill).limit(1))
-    if result.scalars().first() is not None:
-        return  # Already seeded
+    if result.scalars().first() is None:
+        # Fresh DB — insert all skills
+        for skill_data in SEED_SKILLS:
+            skill = Skill(**skill_data)
+            session.add(skill)
+        await session.commit()
+        return
 
+    # Existing DB — add any skills that don't exist yet
+    result = await session.execute(select(Skill.name))
+    existing_names = {row[0] for row in result.all()}
+
+    added = 0
     for skill_data in SEED_SKILLS:
-        skill = Skill(**skill_data)
-        session.add(skill)
+        if skill_data["name"] not in existing_names:
+            skill = Skill(**skill_data)
+            session.add(skill)
+            added += 1
 
-    await session.commit()
+    if added > 0:
+        await session.commit()
