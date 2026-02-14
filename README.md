@@ -1,57 +1,57 @@
 # Middle Manager AI
 
-A local desktop app that acts as an intelligent middleware between humans and AI models. One chat = one project. Everything runs locally. No cloud. No accounts. No telemetry.
+A local-first, intelligent middleware between you and AI models.
 
-## Features
+## Project Status
 
-- **Smart Intent Parsing** — Understands what you *actually* need, not just what you typed
-- **Clarifying Questions** — Asks smart questions when your request is ambiguous
-- **Skill System** — 25+ prompt engineering skills automatically applied
-- **Multi-Model Routing** — Uses the best model for the job (Gemini for general, Claude for code)
-- **Core Memory** — Remembers you across sessions
-- **MCP Integration** — Extensible via Model Context Protocol servers
-- **Full Transparency** — See the optimized prompt that was actually sent
+- **Backend**: ✅ Complete (Core Engine, API, DB)
+- **Frontend**: 🚧 In Progress (Structure built, dependencies pending)
 
-## Quick Start
+## Prerequisites
 
-```bash
-# 1. Install dependencies
-python scripts/setup.py
+- Python 3.11+
+- Node.js 18+ (for frontend)
+- API Keys: Google Gemini (Required), Anthropic Claude (Optional)
 
-# 2. Start dev server
-python scripts/dev.py
+## Quick Start (Backend)
 
-# 3. Open browser to http://localhost:3847
-```
+1. **Setup Environment**:
+   ```bash
+   python scripts/setup.py
+   ```
+
+2. **Configure API Keys**:
+   Copy `.env.example` to `.env` and add your keys:
+   ```bash
+   cp .env.example .env
+   # Edit .env and add GEMINI_API_KEY
+   ```
+
+3. **Run Backend Server**:
+   ```bash
+   .venv/Scripts/python -m backend.main
+   ```
+   Server will start at `http://localhost:3847`.
+   API Documentation: `http://localhost:3847/docs`
 
 ## Architecture
 
+- **Core Engine**:
+  - `Intake`: Analyzes intent using Gemini Flash.
+  - `Clarifier`: Asks smart questions when ambiguous.
+  - `Optimizer`: Builds perfect single-shot prompts.
+  - `Executor`: Routes to best model (Gemini/Claude) and handles tools.
+  - `Memory`: Stores user profile and context in SQLite.
+  - `Skills`: Auto-selects best prompt engineering techniques.
+  - `MCP`: Connects to local tools via Model Context Protocol.
+
+- **Tech Stack**:
+  - FastAPI, SQLAlchmey, SQLite
+  - React, Vite, Tailwind CSS (Frontend)
+
+## Development
+
+To run both backend and frontend (once frontend is fixed):
+```bash
+python scripts/dev.py
 ```
-User Message
-  → Intake (intent parsing, complexity scoring)
-  → Clarifier (if ambiguous)
-  → Skill Engine (select prompt engineering skills)
-  → MCP Selector (pick relevant tools)
-  → Model Router (choose best AI model)
-  → Optimizer (build perfect single-shot prompt)
-  → Executor (send to model, handle tool calls)
-  → Response + Memory Extraction
-```
-
-## Tech Stack
-
-- **Backend**: Python 3.11+, FastAPI, SQLite, SQLAlchemy
-- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS
-- **AI**: Google Gemini, Anthropic Claude
-- **Tools**: MCP (Model Context Protocol)
-
-## API Keys
-
-You'll need at least a Gemini API key (free). Claude API key is optional but recommended for code tasks.
-
-- [Get Gemini API Key](https://aistudio.google.com/app/apikey)
-- [Get Claude API Key](https://console.anthropic.com/)
-
-## License
-
-MIT

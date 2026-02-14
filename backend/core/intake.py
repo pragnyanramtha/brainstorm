@@ -187,7 +187,7 @@ def _fallback_analysis(user_message: str, claude_available: bool) -> IntakeAnaly
     msg_lower = user_message.lower()
 
     # Simple task type detection
-    code_keywords = ["code", "function", "class", "api", "build", "implement", "fix", "bug", "error", "debug", "refactor"]
+    code_keywords = ["code", "function", "class", "api", "build", "implement", "fix", "bug", "error", "debug", "refactor", "script", "app", "project"]
     writing_keywords = ["write", "essay", "article", "blog", "email", "letter"]
     research_keywords = ["research", "find", "search", "what is", "how does", "explain"]
     analysis_keywords = ["analyze", "compare", "evaluate", "review"]
