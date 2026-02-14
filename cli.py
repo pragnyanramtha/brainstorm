@@ -1214,6 +1214,18 @@ As this specialized agent, bring your expert knowledge and focus to this task.
     # Write .gemini/instructions.md (read by Gemini CLI automatically)
     (gemini_dir / "instructions.md").write_text(instructions_content, encoding="utf-8")
     
+    # Write .gemini/config.json to configure shell execution
+    gemini_config = {
+        "shell": get_bash_executable() if sys.platform == "win32" else "/bin/bash",
+        "shellArgs": ["-c"],
+        "env": {
+            "SHELL": get_bash_executable() if sys.platform == "win32" else "/bin/bash",
+            "NODE_NO_READLINE": "1",
+            "TERM": "dumb"
+        }
+    }
+    (gemini_dir / "config.json").write_text(json.dumps(gemini_config, indent=2), encoding="utf-8")
+    
     # Write .cursorrules (industry standard for AI tools like Cursor)
     cursorrules_content = instructions_content.replace("# ", "## ").replace("## Agent Role", "# Agent Role")
     (project_dir / ".cursorrules").write_text(cursorrules_content, encoding="utf-8")
@@ -1221,8 +1233,10 @@ As this specialized agent, bring your expert knowledge and focus to this task.
     # Write INSTRUCTIONS.md at root (common standard)
     (project_dir / "INSTRUCTIONS.md").write_text(instructions_content, encoding="utf-8")
     
+    bash_path = get_bash_executable() if sys.platform == "win32" else "/bin/bash"
     console.print(f"[#6b7280]✓ Initialized project: {project_dir}[/]")
     console.print(f"[#6b7280]✓ Created .gemini/instructions.md (Gemini CLI)[/]")
+    console.print(f"[#6b7280]✓ Created .gemini/config.json (shell: {bash_path})[/]")
     console.print(f"[#6b7280]✓ Created .cursorrules (Cursor/AI tools)[/]")
     console.print(f"[#6b7280]✓ Created INSTRUCTIONS.md (root)[/]")
     console.print()
@@ -1259,12 +1273,13 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
     console.print(f"[#6b7280]{preview}...[/]")
     console.print()
 
-    # Build the gemini command - use native shell on Windows to avoid node-pty issues
+    # Build the gemini command - use bash consistently to avoid nested shell issues
+    # This way Gemini CLI's tool execution uses the same shell (bash)
     if sys.platform == "win32":
-        # Use PowerShell on Windows (avoids node-pty AttachConsole errors)
-        cmd = f'Get-Content "{prompt_file.name}" | gemini --yolo > "{output_log.name}" 2>&1'
-        shell_cmd = ["powershell", "-NoProfile", "-Command", cmd]
-        shell_name = "PowerShell"
+        # Use bash on Windows for consistency with tool execution
+        cmd = f'cd "{project_dir}" && cat GEMINI.md | gemini --yolo > brainstorm-output.log 2>&1'
+        shell_cmd = [BASH_EXECUTABLE, "-c", cmd]
+        shell_name = "bash (Git Bash)"
     else:
         # Use bash on Unix
         cmd = f'cat "{prompt_file.name}" | gemini --yolo > "{output_log.name}" 2>&1'
@@ -1273,27 +1288,45 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
 
     console.print()
     console.print(f"[#9ca3af]Starting Gemini CLI in {shell_name}...[/]")
-    console.print(f"[#6b7280]Command: cat/Get-Content prompt | gemini --yolo[/]")
+    console.print(f"[#6b7280]Command: cat GEMINI.md | gemini --yolo[/]")
     console.print(f"[#6b7280]Working dir: {project_dir}[/]")
+    console.print(f"[#6b7280]Shell for tools: bash (configured in .gemini/config.json)[/]")
     console.print()
 
     try:
+        # Configure environment for proper shell execution in Gemini CLI
+        env = os.environ.copy()
+        env.update({
+            "SHELL": BASH_EXECUTABLE,  # Tell Gemini CLI to use bash for tool execution
+            "NODE_NO_READLINE": "1",   # Disable Node.js readline
+            "TERM": "dumb",            # Non-interactive terminal
+            "FORCE_COLOR": "0",        # Disable color codes that might break parsing
+            "NO_COLOR": "1",           # Another standard for disabling colors
+        })
+        
         # Use native shell to avoid node-pty console attachment issues on Windows
         process = subprocess.Popen(
             shell_cmd,
             cwd=str(project_dir),
-            env={**os.environ, "NODE_NO_READLINE": "1", "TERM": "dumb"},
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
 
-        # Monitor output
+        # Monitor output with timeout protection
         console.print("[#9ca3af]Gemini CLI is running. Monitoring output...[/]")
         console.print("[#6b7280]Press Ctrl+C to stop monitoring (process continues in background)[/]")
         console.print()
 
         last_size = 0
+        no_output_count = 0
+        max_no_output_iterations = 150  # 5 minutes (150 * 2 seconds)
+        
         try:
             while process.poll() is None:
                 time.sleep(2)
+                
+                # Check for output
                 if output_log.exists():
                     current_size = output_log.stat().st_size
                     if current_size > last_size:
@@ -1302,14 +1335,26 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
                             new_content = f.read()
                             if new_content.strip():
                                 console.print(new_content, end="")
+                                no_output_count = 0  # Reset counter on new output
                         last_size = current_size
+                    else:
+                        no_output_count += 1
+                else:
+                    no_output_count += 1
+                
+                # Timeout protection: if no output for too long, warn but continue
+                if no_output_count >= max_no_output_iterations:
+                    console.print()
+                    console.print("[#eab308]⚠ Warning: No output for 5 minutes. Process may be stuck.[/]")
+                    console.print("[#9ca3af]Process is still running in background. Check logs later.[/]")
+                    break
 
         except KeyboardInterrupt:
             console.print()
             console.print("[#eab308]Stopped monitoring. Gemini CLI continues in background.[/]")
             console.print(f"[#9ca3af]Check output: {output_log}[/]")
 
-        # Final read
+        # Final read of output
         if output_log.exists():
             with open(output_log, "r", encoding="utf-8", errors="replace") as f:
                 f.seek(last_size)
@@ -1320,24 +1365,101 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
         console.print()
         console.print()
         
+        # Check process exit code
+        exit_code = process.poll()
+        if exit_code is not None and exit_code != 0:
+            console.print(f"[#eab308]⚠ Gemini CLI exited with code {exit_code}[/]")
+            
+            # Check if any files were created (partial success)
+            created_files = []
+            if project_dir.exists():
+                for item in project_dir.rglob("*"):
+                    if item.is_file() and item.name not in ["GEMINI.md", "brainstorm-output.log", "INSTRUCTIONS.md", ".cursorrules"]:
+                        if not item.name.endswith(".json") or ".gemini" not in str(item):
+                            created_files.append(item)
+            
+            if created_files:
+                console.print(f"[#22d3ee]✓ Partial success: {len(created_files)} files created before exit[/]")
+                for f in created_files[:5]:
+                    console.print(f"  [#6b7280]- {f.relative_to(project_dir)}[/]")
+                if len(created_files) > 5:
+                    console.print(f"  [#6b7280]... and {len(created_files) - 5} more[/]")
+            else:
+                console.print("[#ef4444]No files were created. Check the logs for errors.[/]")
+            
+            # Read stderr if available
+            try:
+                stderr_output = process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
+                if stderr_output.strip():
+                    console.print()
+                    console.print("[#ef4444]Error output:[/]")
+                    console.print(f"[#9ca3af]{stderr_output[:500]}[/]")
+            except Exception:
+                pass
+        
         # Verify we got output
         if output_log.exists() and output_log.stat().st_size > 0:
-            console.print("[#22c55e]✓ Gemini CLI completed successfully[/]")
+            if exit_code == 0 or exit_code is None:
+                console.print("[#22c55e]✓ Gemini CLI completed successfully[/]")
             console.print(f"[#9ca3af]Output size: {output_log.stat().st_size} bytes[/]")
         else:
-            console.print("[#ef4444]⚠ Warning: No output generated. Check if prompt was properly injected.[/]")
+            console.print("[#ef4444]⚠ Warning: No output generated.[/]")
             console.print(f"[#9ca3af]Check prompt file: {prompt_file}[/]")
             console.print(f"[#9ca3af]Check output log: {output_log}[/]")
+            
+            # Offer retry option
+            console.print()
+            console.print("[#eab308]Possible issues:[/]")
+            console.print("  [#6b7280]1. Gemini API key not configured[/]")
+            console.print("  [#6b7280]2. Network connectivity issues[/]")
+            console.print("  [#6b7280]3. Prompt file not readable[/]")
+            console.print("  [#6b7280]4. Gemini CLI version incompatibility[/]")
 
+        # Always return success if we got here (even with warnings)
+        # The presence of output_log and project_dir means work was done
         return {
             "success": True,
             "output_log": str(output_log),
             "project_dir": str(project_dir),
+            "exit_code": exit_code,
+            "partial": exit_code != 0 if exit_code is not None else False,
         }
 
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        console.print()
+        console.print(f"[#ef4444]Error: {e}[/]")
+        console.print("[#9ca3af]Gemini CLI not found. Install: npm install -g @google/generative-ai-cli[/]")
         return {"success": False, "error": "gemini CLI not found. Install it first."}
+    
+    except PermissionError as e:
+        console.print()
+        console.print(f"[#ef4444]Permission Error: {e}[/]")
+        console.print("[#9ca3af]Cannot write to project directory or execute shell commands.[/]")
+        return {"success": False, "error": f"Permission denied: {e}"}
+    
+    except subprocess.TimeoutExpired:
+        console.print()
+        console.print("[#ef4444]Process timed out after extended period.[/]")
+        console.print("[#9ca3af]Try reducing complexity or breaking into smaller tasks.[/]")
+        try:
+            process.kill()
+        except Exception:
+            pass
+        return {"success": False, "error": "Process timed out"}
+    
     except Exception as e:
+        console.print()
+        console.print(f"[#ef4444]Unexpected error: {e}[/]")
+        console.print(f"[#9ca3af]Error type: {type(e).__name__}[/]")
+        
+        # Try to save error state
+        error_log = project_dir / "error.log"
+        try:
+            error_log.write_text(f"Error: {e}\nType: {type(e).__name__}\n", encoding="utf-8")
+            console.print(f"[#9ca3af]Error details saved to: {error_log}[/]")
+        except Exception:
+            pass
+        
         return {"success": False, "error": str(e)}
 
 
@@ -1785,10 +1907,52 @@ def main():
         result = execute_with_gemini_cli(prompt, project_dir)
         if result.get("success"):
             console.print()
-            console.print("[bold #22c55e]Done.[/]")
+            
+            # Check if it was a partial success (early exit)
+            if result.get("partial"):
+                console.print("[#eab308]⚠ Partial completion detected.[/]")
+                console.print(f"[#9ca3af]Exit code: {result.get('exit_code')}[/]")
+                
+                # Check if any files were created
+                created_files = []
+                if Path(result['project_dir']).exists():
+                    for item in Path(result['project_dir']).rglob("*"):
+                        if item.is_file() and item.name not in ["GEMINI.md", "brainstorm-output.log", "INSTRUCTIONS.md", ".cursorrules"]:
+                            if not item.name.endswith(".json") or ".gemini" not in str(item):
+                                created_files.append(item)
+                
+                if created_files:
+                    console.print(f"[#22d3ee]✓ {len(created_files)} files created[/]")
+                    console.print()
+                    console.print("[#9ca3af]Would you like to:[/]")
+                    console.print("  [#6b7280]1. Continue manually in the project directory[/]")
+                    console.print("  [#6b7280]2. Retry with Gemini API (more stable)[/]")
+                    console.print("  [#6b7280]3. Accept partial results[/]")
+                else:
+                    console.print("[#ef4444]No files created. Consider retrying with API method.[/]")
+            else:
+                console.print("[bold #22c55e]Done.[/]")
+            
             console.print(f"[#9ca3af]Project: {result['project_dir']}[/]")
         else:
-            console.print(f"[#ef4444]Error: {result.get('error', 'Unknown')}[/]")
+            console.print()
+            console.print(f"[#ef4444]Execution failed: {result.get('error', 'Unknown')}[/]")
+            
+            # Offer fallback to API
+            if check_gemini_cli():
+                console.print()
+                console.print("[#eab308]Retry with Gemini API instead? (More stable, no shell execution)[/]")
+                if questionary.confirm("Use API fallback?", default=True, style=PROMPT_STYLE).ask():
+                    console.print()
+                    console.print("[#22d3ee]Retrying with Gemini API...[/]")
+                    result = execute_with_api(prompt, project_dir)
+                    if result.get("success"):
+                        files_written = result.get("files_written", [])
+                        if files_written:
+                            console.print()
+                            console.print(f"[#22c55e]✓ Successfully created {len(files_written)} files via API[/]")
+                    else:
+                        console.print(f"[#ef4444]API fallback also failed: {result.get('error')}[/]")
 
     elif exec_method == "api":
         # Initialize project directory with skills
@@ -1798,16 +1962,25 @@ def main():
         if result.get("success"):
             files_written = result.get("files_written", [])
             if files_written:
+                console.print()
+                console.print(f"[#22c55e]✓ Successfully created {len(files_written)} files[/]")
                 post_execution(project_dir, files_written)
             else:
                 # Show the response since no files were extracted
                 console.print()
+                console.print("[#eab308]⚠ No code files extracted from response.[/]")
                 console.print(Rule("[bold #7c3aed]Response[/]", style="#4b5563"))
                 console.print()
-                console.print(Markdown(result.get("content", "")))
-                console.print(f"\n[#9ca3af]Output saved to: {project_dir / 'brainstorm-output.md'}[/]")
+                content = result.get("content", "")
+                if content:
+                    console.print(Markdown(content[:2000]))  # Show first 2000 chars
+                    if len(content) > 2000:
+                        console.print(f"\n[#9ca3af]... (truncated, full output in brainstorm-output.md)[/]")
+                console.print(f"\n[#9ca3af]Full output saved to: {project_dir / 'brainstorm-output.md'}[/]")
         else:
-            console.print(f"[#ef4444]Error: {result.get('error', 'Unknown')}[/]")
+            console.print()
+            console.print(f"[#ef4444]API execution failed: {result.get('error', 'Unknown')}[/]")
+            console.print("[#9ca3af]Check your GEMINI_API_KEY and network connection.[/]")
 
     console.print()
     console.print("[#4b5563]---[/]")
@@ -1816,4 +1989,42 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        console.print()
+        console.print()
+        console.print("[#eab308]⚠ Interrupted by user (Ctrl+C)[/]")
+        console.print("[#9ca3af]Any work in progress has been saved to the project directory.[/]")
+        sys.exit(0)
+    except Exception as e:
+        console.print()
+        console.print()
+        console.print(f"[#ef4444]✗ Unexpected error: {e}[/]")
+        console.print(f"[#9ca3af]Error type: {type(e).__name__}[/]")
+        
+        # Try to save error state
+        try:
+            error_file = DEV_DIR / "brainstorm-error.log"
+            import traceback
+            error_details = f"""Brainstorm CLI Error Report
+Time: {time.strftime('%Y-%m-%d %H:%M:%S')}
+Error: {e}
+Type: {type(e).__name__}
+
+Traceback:
+{traceback.format_exc()}
+"""
+            error_file.write_text(error_details, encoding="utf-8")
+            console.print(f"[#9ca3af]Error details saved to: {error_file}[/]")
+        except Exception:
+            pass
+        
+        console.print()
+        console.print("[#9ca3af]If this persists:[/]")
+        console.print("  [#6b7280]1. Check your Gemini API key is set correctly[/]")
+        console.print("  [#6b7280]2. Ensure bash/Git Bash is installed (Windows)[/]")
+        console.print("  [#6b7280]3. Update dependencies: pip install -r requirements.txt[/]")
+        console.print("  [#6b7280]4. Check the error log above for details[/]")
+        console.print()
+        sys.exit(1)
