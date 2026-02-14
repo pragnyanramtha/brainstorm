@@ -23,7 +23,7 @@ from rich.console import Console
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.intake import analyze_intent
-from backend.core.clarifier import generate_clarifications
+from backend.core.clarifier import generate_clarifications, generate_approach_proposals
 from backend.core.optimizer import build_optimized_prompt
 from backend.core.model_router import select_model
 from backend.core.executor import execute_prompt
@@ -48,6 +48,7 @@ async def process_message(
     on_status: callable = None,
     clarification_answers: Optional[dict] = None,
     previous_intake: Optional[dict] = None,
+    selected_approach: Optional[dict] = None,
 ) -> AsyncGenerator[dict, None]:
     """
     Main processing pipeline. Yields status updates and the final response.
@@ -85,8 +86,54 @@ async def process_message(
         console.print(f"[bold blue]Intake:[/bold blue] {intake['interpreted_intent']}")
         console.print(f"  Type: {intake['task_type']} | Complexity: {intake['complexity']}/10 | Confidence: {intake['confidence_score']}%")
 
-        # ── STEP 3: Clarification (if needed) ──
-        if intake["confidence_score"] < CLARIFICATION_THRESHOLD and not clarification_answers:
+        # ── STEP 3: Brainstorming gate & Clarification ──
+        requires_brainstorming = intake.get("requires_brainstorming", False)
+
+        if requires_brainstorming:
+            # Brainstorming tasks ALWAYS go through clarification + approach proposal
+            if not clarification_answers:
+                # Phase 1: Ask clarifying questions (always, regardless of confidence)
+                yield {"type": "status", "state": "clarifying"}
+
+                clarification = await generate_clarifications(
+                    intake_analysis=intake,
+                    user_message=user_message,
+                    user_profile=user_profile,
+                    core_memories=core_memories,
+                )
+
+                if clarification.needs_clarification:
+                    yield {
+                        "type": "clarification",
+                        "questions": [q.model_dump() for q in clarification.questions],
+                        "_intake": intake,
+                        "_brainstorming": True,
+                    }
+                    return
+
+            elif not selected_approach:
+                # Phase 2: Propose approaches (user answered questions but hasn't picked approach)
+                yield {"type": "status", "state": "brainstorming"}
+
+                approach_result = await generate_approach_proposals(
+                    intake_analysis=intake,
+                    user_message=user_message,
+                    clarification_qa=clarification_answers,
+                    user_profile=user_profile,
+                )
+
+                if approach_result.approaches:
+                    yield {
+                        "type": "approach_proposal",
+                        "approaches": [a.model_dump() for a in approach_result.approaches],
+                        "context_summary": approach_result.context_summary,
+                        "_intake": intake,
+                    }
+                    return
+                # If approach generation failed, continue with execution anyway
+
+        elif intake["confidence_score"] < CLARIFICATION_THRESHOLD and not clarification_answers:
+            # Non-brainstorming tasks: only clarify when confidence is low
             yield {"type": "status", "state": "clarifying"}
 
             clarification = await generate_clarifications(
@@ -100,9 +147,9 @@ async def process_message(
                 yield {
                     "type": "clarification",
                     "questions": [q.model_dump() for q in clarification.questions],
-                    "_intake": intake,  # Pass intake back for reuse after answers
+                    "_intake": intake,
                 }
-                return  # Wait for user to answer
+                return
 
         # ── STEP 4: Select skills ──
         yield {"type": "status", "state": "optimizing"}
@@ -152,6 +199,7 @@ async def process_message(
             selected_skills=selected_skills,
             available_tools=mcp_selection.get("active", []),
             project_context=full_context or None,
+            selected_approach=selected_approach,
         )
 
         # ── STEP 8: Route to model ──

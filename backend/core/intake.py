@@ -28,6 +28,7 @@ class IntakeAnalysis(BaseModel):
     inferred_context: dict
     suggested_capabilities: list[str]
     recommended_model: str
+    requires_brainstorming: bool = False
 
 
 INTAKE_SYSTEM_PROMPT = """You are an intent analysis engine for an AI middleware system called Middle Manager AI.
@@ -43,7 +44,8 @@ You must return a JSON object with these exact fields:
   "ambiguity_areas": ["list of specific things that are unclear or could be interpreted multiple ways"],
   "inferred_context": {"key": "value pairs of things you can reasonably infer from context"},
   "suggested_capabilities": ["list of tools/capabilities this task would benefit from, e.g. 'web_search', 'file_write', 'code_execution'"],
-  "recommended_model": "gemini or claude"
+  "recommended_model": "gemini or claude",
+  "requires_brainstorming": true/false
 }
 
 CRITICAL RULES:
@@ -67,6 +69,19 @@ CRITICAL RULES:
    - "claude" for: code, debugging, system_design, math (if Claude key is available)
    - "gemini" for: writing, research, analysis, creative, data, conversation
    - When in doubt, recommend "gemini"
+8. requires_brainstorming — set to TRUE when:
+   - User is asking to CREATE or BUILD something new (website, app, feature, component, page, design, document)
+   - The task involves subjective design decisions (colors, layout, architecture, style, tone)
+   - The output could vary significantly based on user preferences
+   - Task type is creative, system_design, or code with complexity >= 4
+   - The request is vague about HOW it should be done (even if WHAT is clear)
+   Set to FALSE when:
+   - Simple factual questions or explanations
+   - Debugging a specific error with clear reproduction steps
+   - Quick code edits where the change is unambiguous
+   - Conversation or chitchat
+   - Math problems with a single correct answer
+   IMPORTANT: Even if you're confident about WHAT the user wants, set requires_brainstorming=true if there are many valid WAYS to do it. "Create a landing page" is clear intent but requires brainstorming because of the countless design decisions involved.
 
 EXAMPLES:
 
@@ -163,6 +178,13 @@ async def analyze_intent(
         if recommended == "claude" and not claude_available:
             recommended = "gemini"
 
+        requires_brainstorming = data.get("requires_brainstorming", False)
+        # Force brainstorming for creative/building tasks even if model says no
+        if task_type in ("creative", "system_design") and complexity >= 4:
+            requires_brainstorming = True
+        if task_type == "code" and complexity >= 5:
+            requires_brainstorming = True
+
         return IntakeAnalysis(
             interpreted_intent=data.get("interpreted_intent", user_message),
             task_type=task_type,
@@ -172,6 +194,7 @@ async def analyze_intent(
             inferred_context=data.get("inferred_context", {}),
             suggested_capabilities=data.get("suggested_capabilities", []),
             recommended_model=recommended,
+            requires_brainstorming=requires_brainstorming,
         )
 
     except Exception as e:
@@ -217,6 +240,13 @@ def _fallback_analysis(user_message: str, claude_available: bool) -> IntakeAnaly
     word_count = len(user_message.split())
     complexity = min(10, max(1, word_count // 10 + 2))
 
+    # Heuristic: building/creative tasks need brainstorming
+    build_keywords = ["create", "build", "make", "design", "generate", "develop", "implement", "set up", "setup"]
+    requires_brainstorming = (
+        any(kw in msg_lower for kw in build_keywords)
+        and task_type in ("code", "creative", "system_design", "writing")
+    )
+
     return IntakeAnalysis(
         interpreted_intent=user_message[:200],
         task_type=task_type,
@@ -226,4 +256,5 @@ def _fallback_analysis(user_message: str, claude_available: bool) -> IntakeAnaly
         inferred_context={},
         suggested_capabilities=[],
         recommended_model=recommended,
+        requires_brainstorming=requires_brainstorming,
     )

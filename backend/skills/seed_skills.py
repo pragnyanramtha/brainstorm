@@ -395,6 +395,104 @@ SEED_SKILLS = [
         "complexity_range_min": 1,
         "complexity_range_max": 10,
     },
+
+    # --- Brainstorming ---
+    {
+        "name": "brainstorming_clarification",
+        "category": "brainstorming",
+        "description": "Before building anything, ask targeted clarifying questions to understand purpose, audience, constraints, and success criteria",
+        "implementation_template": (
+            "HARD GATE: Do NOT implement anything until the design is discussed and approved. "
+            "Before writing any code or creating any content: "
+            "1. Understand the PURPOSE — why does this need to exist? What problem does it solve? "
+            "2. Understand the AUDIENCE — who will use/see this? What are their expectations? "
+            "3. Understand the CONSTRAINTS — timeline, technology, brand guidelines, existing systems? "
+            "4. Understand SUCCESS CRITERIA — how will we know this is 'done well'? "
+            "Ask these as specific, multiple-choice questions where possible. "
+            "Maximum 4 questions. Each should resolve a genuine ambiguity."
+        ),
+        "best_for_task_types": json.dumps(["code", "creative", "system_design", "writing"]),
+        "complexity_range_min": 3,
+        "complexity_range_max": 10,
+        "effectiveness_score": 0.95,
+    },
+    {
+        "name": "approach_exploration",
+        "category": "brainstorming",
+        "description": "Propose 2-3 meaningfully different approaches with trade-offs before implementing",
+        "implementation_template": (
+            "After gathering requirements, propose 2-3 meaningfully different approaches. "
+            "For each approach: describe the philosophy, list concrete pros and cons, estimate effort. "
+            "Approaches should differ in STRATEGY, not just surface details. "
+            "Mark one as recommended with a brief justification. "
+            "Let the user choose before proceeding with implementation. "
+            "Never start building until an approach is explicitly approved."
+        ),
+        "best_for_task_types": json.dumps(["code", "creative", "system_design", "writing"]),
+        "complexity_range_min": 4,
+        "complexity_range_max": 10,
+        "effectiveness_score": 0.9,
+    },
+    {
+        "name": "landing_page_design",
+        "category": "brainstorming",
+        "description": "Specialized skill for designing landing pages: conversion goals, hero strategy, content hierarchy, CTA placement",
+        "implementation_template": (
+            "For landing page creation, consider these design dimensions: "
+            "1. CONVERSION GOAL — what's the #1 action you want visitors to take? "
+            "2. HERO STRATEGY — what's above the fold? Product demo, value prop statement, social proof? "
+            "3. CONTENT HIERARCHY — what sections, in what order? (Hero > Problem > Solution > Proof > CTA is classic) "
+            "4. VISUAL IDENTITY — color palette, typography, imagery style, dark vs light "
+            "5. TRUST SIGNALS — testimonials, logos, stats, security badges "
+            "6. TECHNICAL APPROACH — static HTML, React SPA, framework with SSR? "
+            "7. RESPONSIVE STRATEGY — mobile-first or desktop-first? "
+            "Tailor questions around these dimensions based on what's ambiguous."
+        ),
+        "best_for_task_types": json.dumps(["code", "creative"]),
+        "complexity_range_min": 4,
+        "complexity_range_max": 9,
+        "effectiveness_score": 0.85,
+    },
+    {
+        "name": "web_app_design",
+        "category": "brainstorming",
+        "description": "Specialized skill for web app design: architecture, auth, data model, UI patterns, deployment",
+        "implementation_template": (
+            "For web application creation, explore these design decisions: "
+            "1. ARCHITECTURE — monolith, microservices, serverless, JAMstack? "
+            "2. DATA MODEL — what are the core entities and relationships? "
+            "3. AUTH & USERS — do you need authentication? roles? social login? "
+            "4. UI PATTERN — dashboard, wizard, CRUD, social feed, marketplace? "
+            "5. TECH STACK — frontend framework, backend language, database, hosting "
+            "6. API DESIGN — REST, GraphQL, tRPC? "
+            "7. MVP SCOPE — what's essential for v1 vs nice-to-have? "
+            "Focus questions on the genuinely ambiguous dimensions."
+        ),
+        "best_for_task_types": json.dumps(["code", "system_design"]),
+        "complexity_range_min": 5,
+        "complexity_range_max": 10,
+        "effectiveness_score": 0.85,
+    },
+    {
+        "name": "feature_design",
+        "category": "brainstorming",
+        "description": "Specialized skill for feature design within existing projects: scope, integration points, edge cases, migration",
+        "implementation_template": (
+            "For adding features to existing projects, consider: "
+            "1. SCOPE — what exactly does this feature do? What does it NOT do? "
+            "2. INTEGRATION — how does it connect to existing code/data/UI? "
+            "3. USER FLOW — step by step, what does the user experience? "
+            "4. EDGE CASES — what happens when things go wrong? Empty states? Permissions? "
+            "5. DATA CHANGES — new tables/fields? Migrations needed? "
+            "6. TESTING — how will we verify this works? "
+            "7. ROLLOUT — feature flag? Gradual rollout? Breaking changes? "
+            "Ask about the dimensions where the user's intent is genuinely unclear."
+        ),
+        "best_for_task_types": json.dumps(["code", "system_design"]),
+        "complexity_range_min": 4,
+        "complexity_range_max": 10,
+        "effectiveness_score": 0.85,
+    },
 ]
 
 

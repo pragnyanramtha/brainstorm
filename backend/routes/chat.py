@@ -48,6 +48,9 @@ async def websocket_endpoint(
             await websocket.close(code=4004, reason="Project not found")
             return
 
+        # Track clarification answers across rounds (for brainstorming flow)
+        pending_clarification_answers = None
+
         while True:
             data = await websocket.receive_json()
             
@@ -105,13 +108,9 @@ async def websocket_endpoint(
                     msg_type="clarification_answer"
                 )
 
-                # Continue processing with answers
-                # We need the original message likely. 
-                # For simplicity in this V1, let's assume the frontend re-sends or we cache it?
-                # Actually, orchestrator supports `previous_intake` logic but we need state.
-                # A simpler approach for V1: treat it as a new message but with answers context.
-                # BUT, to make it seamless, let's fetch the last user message.
-                
+                # Store answers for potential approach proposal phase
+                pending_clarification_answers = answers
+
                 last_user_msg = await session.scalar(
                     select(Message)
                     .where(Message.project_id == project_id, Message.role == "user", Message.message_type == "chat")
@@ -136,6 +135,59 @@ async def websocket_endpoint(
                                 content=update["content"],
                                 metadata=update.get("metadata")
                             )
+
+                        # Save approach proposal to history
+                        if update["type"] == "approach_proposal":
+                            await save_message(
+                                role="system",
+                                content="Approach proposals generated",
+                                msg_type="approach_proposal",
+                                metadata={
+                                    "approaches": update["approaches"],
+                                    "context_summary": update.get("context_summary", ""),
+                                }
+                            )
+
+            # Handle approach selection (brainstorming flow)
+            elif data.get("type") == "approach_selection":
+                selected_approach = data.get("approach", {})
+                answers = data.get("clarification_answers", pending_clarification_answers or {})
+
+                # Save selection
+                await save_message(
+                    role="user",
+                    content=json.dumps({"selected_approach": selected_approach.get("title", "")}),
+                    msg_type="approach_selection"
+                )
+
+                last_user_msg = await session.scalar(
+                    select(Message)
+                    .where(Message.project_id == project_id, Message.role == "user", Message.message_type == "chat")
+                    .order_by(Message.created_at.desc())
+                    .limit(1)
+                )
+
+                if last_user_msg:
+                    async for update in process_message(
+                        user_message=last_user_msg.content,
+                        project_id=project_id,
+                        session=session,
+                        project_folder=project.folder_path,
+                        project_context=project.summary,
+                        clarification_answers=answers,
+                        selected_approach=selected_approach,
+                    ):
+                        await websocket.send_json(update)
+
+                        if update["type"] == "message" and update["role"] == "assistant":
+                            await save_message(
+                                role="assistant",
+                                content=update["content"],
+                                metadata=update.get("metadata")
+                            )
+
+                # Reset brainstorming state
+                pending_clarification_answers = None
 
     except WebSocketDisconnect:
         print(f"Client disconnected from project {project_id}")
@@ -164,9 +216,10 @@ async def chat_post(
 
     content = payload.get("content")
     answers = payload.get("clarification_answers")
+    selected_approach = payload.get("selected_approach")
 
-    if not content and not answers:
-        raise HTTPException(status_code=400, detail="Content or answers required")
+    if not content and not answers and not selected_approach:
+        raise HTTPException(status_code=400, detail="Content, answers, or approach selection required")
 
     # Save user message if new content
     if content:
@@ -188,6 +241,7 @@ async def chat_post(
         project_folder=project.folder_path,
         project_context=project.summary,
         clarification_answers=answers,
+        selected_approach=selected_approach,
     ):
         updates.append(update)
         

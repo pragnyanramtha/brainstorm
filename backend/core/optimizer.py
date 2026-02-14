@@ -59,6 +59,7 @@ async def build_optimized_prompt(
     selected_skills: Optional[list] = None,
     available_tools: Optional[list] = None,
     project_context: Optional[str] = None,
+    selected_approach: Optional[dict] = None,
 ) -> str:
     """
     Build a perfect single-shot prompt using Gemini Flash as the optimizer.
@@ -145,6 +146,26 @@ async def build_optimized_prompt(
     if project_context:
         context_sections.append(f"=== PROJECT CONTEXT (what's been built so far) ===\n{project_context}")
 
+    # 9. Selected approach (from brainstorming)
+    if selected_approach:
+        approach_text = (
+            f"Title: {selected_approach.get('title', '')}"
+            f"\nDescription: {selected_approach.get('description', '')}"
+            f"\nEffort Level: {selected_approach.get('effort_level', 'medium')}"
+        )
+        pros = selected_approach.get('pros', [])
+        cons = selected_approach.get('cons', [])
+        if pros:
+            approach_text += f"\nStrengths: {', '.join(pros)}"
+        if cons:
+            approach_text += f"\nTradeoffs to manage: {', '.join(cons)}"
+        context_sections.append(
+            f"=== USER'S CHOSEN APPROACH (follow this direction) ===\n{approach_text}\n\n"
+            f"IMPORTANT: The user specifically chose this approach after reviewing alternatives. "
+            f"Implement according to this approach's philosophy and strengths. "
+            f"Address the listed tradeoffs proactively."
+        )
+
     # Target model info
     recommended = intake_analysis.get('recommended_model', 'gemini')
     context_sections.append(f"=== TARGET MODEL ===\nThis prompt will be sent to: {recommended}")
@@ -170,14 +191,14 @@ async def build_optimized_prompt(
 
         if not optimized or len(optimized) < 20:
             console.print("[yellow]Optimizer returned empty/short response, using fallback[/yellow]")
-            return _fallback_prompt(user_message, intake_analysis, user_profile, selected_skills, project_context)
+            return _fallback_prompt(user_message, intake_analysis, user_profile, selected_skills, project_context, selected_approach)
 
         return optimized
 
     except Exception as e:
         console.print(f"[red]Optimizer failed: {e}[/red]")
         console.print(traceback.format_exc())
-        return _fallback_prompt(user_message, intake_analysis, user_profile, selected_skills, project_context)
+        return _fallback_prompt(user_message, intake_analysis, user_profile, selected_skills, project_context, selected_approach)
 
 
 def _fallback_prompt(
@@ -186,6 +207,7 @@ def _fallback_prompt(
     user_profile: Optional[dict] = None,
     selected_skills: Optional[list] = None,
     project_context: Optional[str] = None,
+    selected_approach: Optional[dict] = None,
 ) -> str:
     """Hand-crafted fallback prompt when the optimizer LLM fails."""
     parts = []
@@ -232,6 +254,14 @@ def _fallback_prompt(
 
     if project_context:
         parts.append(f"\nPROJECT CONTEXT:\n{project_context}")
+
+    # Selected approach
+    if selected_approach:
+        parts.append(
+            f"\nCHOSEN APPROACH: {selected_approach.get('title', '')}\n"
+            f"{selected_approach.get('description', '')}\n"
+            f"Follow this approach's philosophy and direction."
+        )
 
     # Skills
     if selected_skills:
