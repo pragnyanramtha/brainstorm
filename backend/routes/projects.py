@@ -10,9 +10,12 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
+from pathlib import Path
+
 from backend.database import get_session, Project, Message
-from backend.config import WORKSPACE_DIR
 from backend.utils.helpers import generate_id, slugify_name
+
+DEV_DIR = Path.home() / "dev"
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -79,12 +82,12 @@ async def create_project(
     """Create a new project."""
     project_id = generate_id()
     slug = slugify_name(data.name)
-    folder_path = WORKSPACE_DIR / slug
+    folder_path = DEV_DIR / slug
     
     # Ensure unique folder path
     counter = 1
     while folder_path.exists():
-        folder_path = WORKSPACE_DIR / f"{slug}-{counter}"
+        folder_path = DEV_DIR / f"{slug}-{counter}"
         counter += 1
     
     folder_path.mkdir(parents=True, exist_ok=True)

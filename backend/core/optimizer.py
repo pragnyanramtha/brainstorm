@@ -25,6 +25,7 @@ You will receive:
 6. Skills to apply (prompt engineering techniques)
 7. Available tools
 8. Project context
+9. Selected approach (if brainstorming was done)
 
 Your output must be a COMPLETE prompt — ready to send directly to the execution model. It should contain:
 
@@ -47,7 +48,30 @@ CRITICAL RULES:
 - For code tasks: always specify the language, framework, and any architectural patterns to follow.
 - For writing tasks: specify the tone, audience, length, and format.
 - Keep the prompt focused and actionable. Long doesn't mean better — but complete does.
-- If project context exists, summarize what's been built so far so the model can continue coherently."""
+- If project context exists, summarize what's been built so far so the model can continue coherently.
+
+FILE OUTPUT FORMAT (CRITICAL for code/building tasks):
+When the task involves creating or building something (code, websites, apps, etc.), you MUST instruct the execution model to format code output using this exact pattern for EVERY file:
+
+File: path/to/filename.ext
+```language
+<code content>
+```
+
+For example:
+File: package.json
+```json
+{ "name": "my-app" }
+```
+
+File: src/app/page.tsx
+```tsx
+export default function Home() { return <div>Hello</div> }
+```
+
+This format is MANDATORY for code generation tasks because the files will be automatically extracted, written to disk, and the project will be scaffolded and run on localhost. Without this format, the user just gets a code dump in chat.
+
+Include ALL necessary files — don't skip config files, don't say "use the default" — output the actual content. The project must be complete enough to run with just `npm install && npm run dev` or equivalent."""
 
 
 async def build_optimized_prompt(

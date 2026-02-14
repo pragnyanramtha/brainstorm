@@ -32,6 +32,7 @@ from backend.memory.core_memory import recall_memories, remember
 from backend.skills.skill_engine import select_skills
 from backend.mcps.mcp_selector import select_mcps
 from backend.tools.web_search import should_search, search_and_summarize
+from backend.tools.project_scaffolder import scaffold_project, extract_files_from_response
 
 console = Console()
 
@@ -54,14 +55,15 @@ async def process_message(
     Main processing pipeline. Yields status updates and the final response.
 
     Yields dicts with:
-    - {"type": "status", "state": "analyzing|clarifying|optimizing|executing|complete"}
+    - {"type": "status", "state": "analyzing|clarifying|brainstorming|optimizing|executing|scaffolding|complete", "detail": "..."}
     - {"type": "clarification", "questions": [...]}
+    - {"type": "approach_proposal", "approaches": [...]}
     - {"type": "message", "role": "assistant", "content": "...", "metadata": {...}}
     - {"type": "error", "message": "..."}
     """
     try:
         # ── STEP 1: Load user profile & memories ──
-        yield {"type": "status", "state": "analyzing"}
+        yield {"type": "status", "state": "analyzing", "detail": "Loading your profile & memories..."}
 
         user_profile = await get_user_profile(session)
         core_memories = await recall_memories(
@@ -75,6 +77,7 @@ async def process_message(
             intake = previous_intake
             intake["confidence_score"] = 95  # Answers resolved ambiguity
         else:
+            yield {"type": "status", "state": "analyzing", "detail": "Analyzing what you need..."}
             intake_result = await analyze_intent(
                 user_message=user_message,
                 user_profile=user_profile,
@@ -152,7 +155,7 @@ async def process_message(
                 return
 
         # ── STEP 4: Select skills ──
-        yield {"type": "status", "state": "optimizing"}
+        yield {"type": "status", "state": "optimizing", "detail": "Selecting skills for this task..."}
 
         selected_skills = await select_skills(
             task_type=intake["task_type"],
@@ -162,6 +165,7 @@ async def process_message(
         )
 
         # ── STEP 5: Select MCPs ──
+        yield {"type": "status", "state": "optimizing", "detail": "Checking available tools..."}
         mcp_selection = await select_mcps(
             task_type=intake["task_type"],
             interpreted_intent=intake["interpreted_intent"],
@@ -171,10 +175,12 @@ async def process_message(
         # ── STEP 6: Web search (if needed) ──
         search_context = None
         if should_search(intake["interpreted_intent"], intake["task_type"], user_message):
+            yield {"type": "status", "state": "optimizing", "detail": "Searching the web for context..."}
             console.print("[blue]Running web search...[/blue]")
             search_context = await search_and_summarize(user_message[:200])
 
         # ── STEP 7: Build optimized prompt ──
+        yield {"type": "status", "state": "optimizing", "detail": "Crafting the perfect prompt..."}
         # Build clarification Q&A pairs if we have answers
         clarification_qa = None
         if clarification_answers:
@@ -210,15 +216,42 @@ async def process_message(
         )
 
         # ── STEP 9: Execute ──
-        yield {"type": "status", "state": "executing"}
+        yield {"type": "status", "state": "executing", "detail": f"Sending to {model_selection.primary_model}..."}
 
         result = await execute_prompt(
             prompt=optimized_prompt,
             model=model_selection.primary_model,
             provider=model_selection.provider,
             fallback_model=model_selection.fallback_model,
-            project_folder=project_folder,
         )
+
+        # ── STEP 9.5: Scaffold project if this was a building task ──
+        scaffold_result = None
+        if intake.get("requires_brainstorming") or intake["task_type"] in ("code", "creative", "system_design"):
+            # Check if AI response contains file blocks worth scaffolding
+            candidate_files = extract_files_from_response(result["content"])
+            if candidate_files:
+                # Derive project name from intent
+                project_name = intake.get("interpreted_intent", "project")[:60]
+
+                async def scaffold_status(state, detail):
+                    yield_data = {"type": "status", "state": state, "detail": detail}
+                    # Can't yield from nested callback, so we track status via websocket directly
+                    pass
+
+                yield {"type": "status", "state": "scaffolding", "detail": f"Creating project with {len(candidate_files)} files..."}
+
+                scaffold_result = await scaffold_project(
+                    project_name=project_name,
+                    ai_response=result["content"],
+                )
+
+                if scaffold_result.get("scaffolded"):
+                    dev_server = scaffold_result.get("dev_server", {})
+                    if dev_server and dev_server.get("running"):
+                        yield {"type": "status", "state": "scaffolding", "detail": f"Dev server running at {dev_server['url']}"}
+                    else:
+                        yield {"type": "status", "state": "scaffolding", "detail": f"Project created at {scaffold_result['project_dir']}"}
 
         # ── STEP 10: Build metadata ──
         metadata = {
@@ -238,11 +271,52 @@ async def process_message(
         if result.get("files_created"):
             metadata["files_created"] = result["files_created"]
 
-        # ── STEP 11: Yield response ──
+        # Add scaffold metadata
+        if scaffold_result and scaffold_result.get("scaffolded"):
+            metadata["project_dir"] = scaffold_result["project_dir"]
+            metadata["project_type"] = scaffold_result.get("project_type", "unknown")
+            metadata["files_created"] = scaffold_result.get("files_created", [])
+            dev_server = scaffold_result.get("dev_server", {})
+            if dev_server and dev_server.get("running"):
+                metadata["dev_server_url"] = dev_server["url"]
+                metadata["dev_server_pid"] = dev_server.get("pid")
+
+        # ── STEP 11: Build response content ──
+        response_content = result["content"]
+
+        # If we scaffolded, prepend a project summary instead of raw code dump
+        if scaffold_result and scaffold_result.get("scaffolded"):
+            project_dir = scaffold_result["project_dir"]
+            files_list = scaffold_result.get("files_created", [])
+            dev_server = scaffold_result.get("dev_server", {})
+
+            project_header = f"## ✅ Project Created\n\n"
+            project_header += f"**Location:** `{project_dir}`\n\n"
+
+            if files_list:
+                project_header += f"**Files created ({len(files_list)}):**\n"
+                for f in files_list[:20]:
+                    project_header += f"- `{f}`\n"
+                if len(files_list) > 20:
+                    project_header += f"- ... and {len(files_list) - 20} more\n"
+                project_header += "\n"
+
+            if dev_server and dev_server.get("running"):
+                project_header += f"**🚀 Dev server running:** [{dev_server['url']}]({dev_server['url']})\n\n"
+            elif dev_server and dev_server.get("error"):
+                project_header += f"**⚠️ Dev server:** {dev_server['error']}\n\n"
+
+            if not scaffold_result.get("install_success"):
+                project_header += f"**⚠️ Dependencies:** Install may have had issues. Run `npm install` or `pip install -r requirements.txt` manually.\n\n"
+
+            project_header += "---\n\n"
+            response_content = project_header + response_content
+
+        # ── STEP 12: Yield response ──
         yield {
             "type": "message",
             "role": "assistant",
-            "content": result["content"],
+            "content": response_content,
             "metadata": metadata,
         }
         yield {"type": "status", "state": "complete"}
