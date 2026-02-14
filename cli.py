@@ -25,7 +25,7 @@ import re
 import subprocess
 import sys
 import shutil
-import time
+import timew
 from pathlib import Path
 
 # Add project root to path
@@ -1171,7 +1171,7 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
     project_dir.mkdir(parents=True, exist_ok=True)
 
     output_log = project_dir / "brainstorm-output.log"
-    prompt_file = project_dir / "gemini.md"
+    prompt_file = project_dir / "GEMINI.md"
 
     # Write prompt to a file (safer than passing via command line)
     prompt_file.write_text(prompt, encoding="utf-8")
@@ -1303,7 +1303,7 @@ def execute_with_api(prompt: str, project_dir: Path) -> dict:
         content = response.text or ""
 
     # Save prompt and response
-    (project_dir / "gemini.md").write_text(prompt, encoding="utf-8")
+    (project_dir / "GEMINI.md").write_text(prompt, encoding="utf-8")
     (project_dir / "brainstorm-output.md").write_text(content, encoding="utf-8")
 
     # Extract and write files
@@ -1701,7 +1701,7 @@ def main():
         ))
 
         # Also save to file
-        prompt_file = project_dir / "gemini.md"
+        prompt_file = project_dir / "GEMINI.md"
         project_dir.mkdir(parents=True, exist_ok=True)
         prompt_file.write_text(prompt, encoding="utf-8")
         console.print(f"\n[#9ca3af]Prompt saved to: {prompt_file}[/]")
