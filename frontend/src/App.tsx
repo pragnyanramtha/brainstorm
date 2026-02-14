@@ -76,7 +76,7 @@ export default function App() {
     }
 
     return (
-        <div className="h-screen w-full flex bg-slate-50 overflow-hidden text-slate-900 selection:bg-slate-200 selection:text-slate-900 font-sans">
+        <div className="h-screen w-full flex bg-background overflow-hidden text-foreground selection:bg-accent/30 selection:text-foreground font-sans">
             {/* Sidebar with Settings trigger */}
             <Sidebar
                 projects={projects}
@@ -89,7 +89,7 @@ export default function App() {
             />
 
             {/* Main Content Area */}
-            <main className="flex-1 flex min-w-0 relative z-0 bg-white">
+            <main className="flex-1 flex min-w-0 relative z-0 bg-surface">
                 <ChatArea
                     messages={messages}
                     onSendMessage={sendMessage}

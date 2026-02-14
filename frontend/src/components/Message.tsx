@@ -21,24 +21,24 @@ function CodeBlock({ children, className }: { children: any; className?: string 
     };
 
     return (
-        <div className="my-6 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 shadow-sm group">
+        <div className="my-6 rounded-lg overflow-hidden border border-border bg-surface-container shadow-sm group">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2 bg-slate-100/50 border-b border-slate-200">
+            <div className="flex items-center justify-between px-4 py-2 bg-surface-raised border-b border-border">
                 <div className="flex items-center gap-2">
-                    <Terminal size={12} className="text-slate-500" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{language || 'text'}</span>
+                    <Terminal size={12} className="text-muted-foreground" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{language || 'text'}</span>
                 </div>
                 <button
                     onClick={handleCopy}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-200 text-[10px] font-bold text-slate-500 hover:text-slate-900 transition-all uppercase tracking-wider"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-surface-raised-high text-[10px] font-bold text-muted-foreground hover:text-foreground transition-all uppercase tracking-wider"
                 >
-                    {copied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
-                    <span className={copied ? 'text-emerald-600' : ''}>{copied ? 'Copied' : 'Copy'}</span>
+                    {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+                    <span className={copied ? 'text-success' : ''}>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
             </div>
 
             {/* Code */}
-            <div className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-slate-700">
+            <div className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-foreground">
                 <code>{code}</code>
             </div>
         </div>
@@ -55,21 +55,21 @@ export function Message({ message }: MessageProps) {
 
             {/* Project Info Banner */}
             {isAssistant && message.metadata?.dev_server_url && (
-                <div className="w-full mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 animate-fade-in shadow-sm">
+                <div className="w-full mb-4 bg-accent/10 border border-accent/20 rounded-xl px-4 py-3 animate-fade-in shadow-sm">
                     <div className="flex items-center gap-4 flex-wrap">
                         {message.metadata.dev_server_url && (
                             <a
                                 href={message.metadata.dev_server_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-xs text-blue-700 hover:text-blue-800 transition-colors font-semibold"
+                                className="flex items-center gap-2 text-xs text-accent hover:text-accent-foreground transition-colors font-semibold"
                             >
                                 <ExternalLink size={14} />
                                 <span>{message.metadata.dev_server_url}</span>
                             </a>
                         )}
                         {message.metadata.project_dir && (
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                                 <FolderOpen size={12} />
                                 <span>{message.metadata.project_dir}</span>
                             </div>
@@ -80,13 +80,13 @@ export function Message({ message }: MessageProps) {
 
             {/* Header/Name */}
             <div className={`flex items-center gap-2 mb-1.5 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${isUser ? 'bg-slate-200 text-slate-600' : 'bg-slate-900 text-white shadow-sm'}`}>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${isUser ? 'bg-surface-raised-high text-muted-foreground' : 'bg-primary text-primary-foreground shadow-sm'}`}>
                     {isUser ? <User size={12} /> : <Activity size={12} />}
                 </div>
-                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">
-                    {isUser ? 'User Session' : 'Middle Manager'}
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">
+                    {isUser ? 'User Session' : 'Brainstorm AI'}
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 transition-opacity opacity-0 group-hover:opacity-100">
+                <span className="text-[10px] font-medium text-muted-foreground transition-opacity opacity-0 group-hover:opacity-100">
                     {new Date(message.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
             </div>
@@ -94,8 +94,8 @@ export function Message({ message }: MessageProps) {
             <div className={`max-w-[90%] sm:max-w-[85%] ${isUser ? '' : 'w-full'}`}>
                 <div
                     className={`relative px-5 py-4 text-[14px] leading-relaxed transition-all duration-200 border ${isUser
-                        ? 'bg-slate-900 border-slate-900 text-white rounded-2xl rounded-tr-sm shadow-md'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 rounded-2xl rounded-tl-sm'
+                        ? 'bg-primary border-primary text-primary-foreground rounded-2xl rounded-tr-sm shadow-md'
+                        : 'bg-surface border-border text-foreground rounded-2xl rounded-tl-sm'
                         }`}
                 >
                     {isAssistant ? (
@@ -108,7 +108,7 @@ export function Message({ message }: MessageProps) {
                                         const isInline = !match;
 
                                         if (isInline) {
-                                            return <code className="font-mono text-[0.9em] bg-slate-200/50 px-1.5 py-0.5 rounded border border-slate-200 text-slate-800" {...props}>{children}</code>;
+                                            return <code className="font-mono text-[0.9em] bg-surface-raised px-1.5 py-0.5 rounded border border-border text-foreground" {...props}>{children}</code>;
                                         }
 
                                         return <CodeBlock className={className}>{children}</CodeBlock>;
@@ -131,19 +131,19 @@ export function Message({ message }: MessageProps) {
                     <div className="flex items-center gap-4 mt-2 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                             onClick={() => setShowDebug(!showDebug)}
-                            className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${showDebug ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${showDebug ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             <Eye size={12} />
                             <span>{showDebug ? 'Hide Technical Details' : 'View Technical Details'}</span>
                         </button>
 
-                        <div className="h-2 w-px bg-slate-200" />
+                        <div className="h-2 w-px bg-border" />
 
                         <div className="flex items-center gap-2">
-                            <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors">
+                            <button className="p-1 text-muted-foreground hover:text-foreground hover:bg-surface-raised rounded transition-colors">
                                 <ThumbsUp size={12} />
                             </button>
-                            <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors">
+                            <button className="p-1 text-muted-foreground hover:text-foreground hover:bg-surface-raised rounded transition-colors">
                                 <ThumbsDown size={12} />
                             </button>
                         </div>
@@ -152,7 +152,7 @@ export function Message({ message }: MessageProps) {
 
                 {/* Debug Panel */}
                 {showDebug && message.id && (
-                    <div className="mt-4 border-t border-slate-100 pt-4 animate-slide-up">
+                    <div className="mt-4 border-t border-border pt-4 animate-slide-up">
                         <DebugPanel messageId={message.id} />
                     </div>
                 )}
@@ -160,4 +160,3 @@ export function Message({ message }: MessageProps) {
         </div>
     );
 }
-
