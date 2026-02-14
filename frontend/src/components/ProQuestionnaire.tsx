@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight, Search, Zap, Loader2 } from 'lucide-react';
+import { ChevronRight, Zap } from 'lucide-react';
 import type { ClarificationQuestion } from '../types';
 
 interface ProQuestionnaireProps {
@@ -20,19 +20,19 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
     const [focusedField, setFocusedField] = useState<string | null>(null);
 
     const handleChipClick = (question: string, value: string) => {
-        setAnswers(prev => ({ ...prev, [question]: value }));
+        setAnswers((prev: Record<string, string>) => ({ ...prev, [question]: value }));
     };
 
     const handleInputChange = (question: string, value: string) => {
-        setAnswers(prev => ({ ...prev, [question]: value }));
+        setAnswers((prev: Record<string, string>) => ({ ...prev, [question]: value }));
     };
 
     const handleSubmit = () => {
         onSubmit(answers);
     };
 
-    const allAnswered = questions.every(q => answers[q.question]?.trim());
-    const remainingCount = questions.length - Object.values(answers).filter(v => v?.trim()).length;
+    const allAnswered = questions.every(q => (answers[q.question] || '').trim());
+    const remainingCount = questions.length - Object.values(answers).filter(v => (v || '').trim()).length;
 
     return (
         <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in mb-8">
@@ -88,8 +88,8 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
                                                 key={opt}
                                                 onClick={() => handleChipClick(q.question, opt)}
                                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${answers[q.question] === opt
-                                                        ? 'bg-accent/20 border-accent/40 text-primary shadow-[0_0_15px_-5px_rgba(11,87,208,0.2)]'
-                                                        : 'bg-white/[0.03] border-white/[0.08] text-text-secondary hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-text-primary'
+                                                    ? 'bg-accent/20 border-accent/40 text-primary shadow-[0_0_15px_-5px_rgba(11,87,208,0.2)]'
+                                                    : 'bg-white/[0.03] border-white/[0.08] text-text-secondary hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-text-primary'
                                                     }`}
                                             >
                                                 {opt}
@@ -108,8 +108,8 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
                         onClick={handleSubmit}
                         disabled={!allAnswered && remainingCount > 0}
                         className={`group flex items-center gap-2.5 px-7 py-3 rounded-2xl text-sm font-bold transition-all ${allAnswered
-                                ? 'bg-white text-surface hover:bg-white/90 shadow-xl shadow-black/20 active:scale-[0.98]'
-                                : 'bg-white/5 text-text-muted border border-white/5 cursor-not-allowed'
+                            ? 'bg-white text-surface hover:bg-white/90 shadow-xl shadow-black/20 active:scale-[0.98]'
+                            : 'bg-white/5 text-text-muted border border-white/5 cursor-not-allowed'
                             }`}
                     >
                         <span>Continue</span>

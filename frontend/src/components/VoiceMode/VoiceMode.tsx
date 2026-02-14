@@ -265,5 +265,6 @@ export const VoiceMode = ({ className, renderTrigger }: { className?: string, re
                     Say "Create a file called..." or "List files"
                 </div>
             </div>
-            );
+        </>
+    );
 };
