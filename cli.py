@@ -25,7 +25,7 @@ import re
 import subprocess
 import sys
 import shutil
-import timew
+import time
 from pathlib import Path
 
 # Add project root to path
@@ -1166,6 +1166,68 @@ def check_gemini_cli() -> bool:
     return shutil.which("gemini") is not None
 
 
+def initialize_project_dir(project_dir: Path, skills: list, agent_skills: list, mcps: list, gemini_kit_agent: dict = None) -> None:
+    """Initialize project directory with industry-standard AI instruction files."""
+    # Create directory structure
+    project_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create .gemini directory (standard for Gemini CLI)
+    gemini_dir = project_dir / ".gemini"
+    gemini_dir.mkdir(exist_ok=True)
+    
+    # Build instructions content that Gemini CLI reads automatically
+    instructions_parts = []
+    
+    # Add agent role if using Gemini-Kit
+    if gemini_kit_agent:
+        instructions_parts.append(f"""# Agent Role
+
+You are the {gemini_kit_agent.get('emoji')} {gemini_kit_agent.get('name')} agent.
+Role: {gemini_kit_agent.get('role')}
+Best used when: {gemini_kit_agent.get('when')}
+
+As this specialized agent, bring your expert knowledge and focus to this task.
+""")
+    
+    # Add skills
+    if skills:
+        instructions_parts.append("# Applied Skills\n")
+        for s in skills:
+            instructions_parts.append(f"## {s.get('name')}\n{s.get('implementation_template')}\n")
+    
+    # Add agent skills
+    if agent_skills:
+        instructions_parts.append("# Installed Agent Skills\n")
+        instructions_parts.append("You have access to these community-vetted skills:\n")
+        for skill in agent_skills[:20]:
+            instructions_parts.append(f"- {skill}")
+        instructions_parts.append("")
+    
+    # Add MCP tools
+    if mcps:
+        instructions_parts.append("# Available Tools (MCP)\n")
+        for mcp in mcps:
+            instructions_parts.append(f"## {mcp.get('name')}\n{mcp.get('description')}\n")
+    
+    instructions_content = "\n".join(instructions_parts)
+    
+    # Write .gemini/instructions.md (read by Gemini CLI automatically)
+    (gemini_dir / "instructions.md").write_text(instructions_content, encoding="utf-8")
+    
+    # Write .cursorrules (industry standard for AI tools like Cursor)
+    cursorrules_content = instructions_content.replace("# ", "## ").replace("## Agent Role", "# Agent Role")
+    (project_dir / ".cursorrules").write_text(cursorrules_content, encoding="utf-8")
+    
+    # Write INSTRUCTIONS.md at root (common standard)
+    (project_dir / "INSTRUCTIONS.md").write_text(instructions_content, encoding="utf-8")
+    
+    console.print(f"[#6b7280]✓ Initialized project: {project_dir}[/]")
+    console.print(f"[#6b7280]✓ Created .gemini/instructions.md (Gemini CLI)[/]")
+    console.print(f"[#6b7280]✓ Created .cursorrules (Cursor/AI tools)[/]")
+    console.print(f"[#6b7280]✓ Created INSTRUCTIONS.md (root)[/]")
+    console.print()
+
+
 def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
     """Execute prompt using Gemini CLI with --yolo flag."""
     project_dir.mkdir(parents=True, exist_ok=True)
@@ -1197,22 +1259,30 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
     console.print(f"[#6b7280]{preview}...[/]")
     console.print()
 
-    # Build the gemini command using stdin redirection (more reliable than -p with command substitution)
-    # This avoids issues with special characters, quotes, and command length limits
-    cmd = f'cd "{project_dir}" && cat "{prompt_file.name}" | gemini --yolo > "{output_log.name}" 2>&1'
+    # Build the gemini command - use native shell on Windows to avoid node-pty issues
+    if sys.platform == "win32":
+        # Use PowerShell on Windows (avoids node-pty AttachConsole errors)
+        cmd = f'Get-Content "{prompt_file.name}" | gemini --yolo > "{output_log.name}" 2>&1'
+        shell_cmd = ["powershell", "-NoProfile", "-Command", cmd]
+        shell_name = "PowerShell"
+    else:
+        # Use bash on Unix
+        cmd = f'cat "{prompt_file.name}" | gemini --yolo > "{output_log.name}" 2>&1'
+        shell_cmd = [BASH_EXECUTABLE, "-c", cmd]
+        shell_name = "bash"
 
     console.print()
-    console.print("[#9ca3af]Starting Gemini CLI in bash...[/]")
-    console.print(f"[#6b7280]Command: cat prompt | gemini --yolo[/]")
+    console.print(f"[#9ca3af]Starting Gemini CLI in {shell_name}...[/]")
+    console.print(f"[#6b7280]Command: cat/Get-Content prompt | gemini --yolo[/]")
     console.print(f"[#6b7280]Working dir: {project_dir}[/]")
-    console.print(f"[#6b7280]Shell: {BASH_EXECUTABLE}[/]")
     console.print()
 
     try:
-        # Use list form to avoid shell parsing issues with spaces in executable path
+        # Use native shell to avoid node-pty console attachment issues on Windows
         process = subprocess.Popen(
-            [BASH_EXECUTABLE, "-c", cmd],
+            shell_cmd,
             cwd=str(project_dir),
+            env={**os.environ, "NODE_NO_READLINE": "1", "TERM": "dumb"},
         )
 
         # Monitor output
@@ -1691,6 +1761,9 @@ def main():
                 return
 
     if exec_method == "prompt":
+        # Initialize project directory with skills
+        initialize_project_dir(project_dir, skills, agent_skills, mcps, gemini_kit_agent)
+        
         console.print()
         console.print(Rule("[bold #7c3aed]Your prompt[/]", style="#4b5563"))
         console.print()
@@ -1702,11 +1775,13 @@ def main():
 
         # Also save to file
         prompt_file = project_dir / "GEMINI.md"
-        project_dir.mkdir(parents=True, exist_ok=True)
         prompt_file.write_text(prompt, encoding="utf-8")
         console.print(f"\n[#9ca3af]Prompt saved to: {prompt_file}[/]")
 
     elif exec_method == "cli":
+        # Initialize project directory with skills
+        initialize_project_dir(project_dir, skills, agent_skills, mcps, gemini_kit_agent)
+        
         result = execute_with_gemini_cli(prompt, project_dir)
         if result.get("success"):
             console.print()
@@ -1716,6 +1791,9 @@ def main():
             console.print(f"[#ef4444]Error: {result.get('error', 'Unknown')}[/]")
 
     elif exec_method == "api":
+        # Initialize project directory with skills
+        initialize_project_dir(project_dir, skills, agent_skills, mcps, gemini_kit_agent)
+        
         result = execute_with_api(prompt, project_dir)
         if result.get("success"):
             files_written = result.get("files_written", [])
