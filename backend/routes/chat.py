@@ -72,17 +72,19 @@ async def websocket_endpoint(
                     project_folder=project.folder_path,
                     project_context=project.summary or "",  # Pass summary as context
                 ):
-                    # Forward all updates to frontend
-                    await websocket.send_json(update)
-                    
-                    # Persist assistant messages to DB
                     if update["type"] == "message" and update["role"] == "assistant":
-                        await save_message(
+                        # Persist first to generate ID
+                        msg = await save_message(
                             role="assistant",
                             content=update["content"],
                             metadata=update.get("metadata")
                         )
+                        update["id"] = msg.id
                     
+                    # Forward to frontend (now with ID for messages)
+                    await websocket.send_json(update)
+                    
+                    # If clarification needed, save it (optional, but good for history)
                     # If clarification needed, save it (optional, but good for history)
                     if update["type"] == "clarification":
                         await save_message(
