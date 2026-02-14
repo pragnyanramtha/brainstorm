@@ -64,7 +64,25 @@ def get_bash_executable() -> str:
         ]
         for path in bash_paths:
             if os.path.exists(path):
-                return path
+                # Return path in short (8.3) format to avoid space issues
+                try:
+                    import ctypes
+                    from ctypes import wintypes
+                    _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+                    _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+                    _GetShortPathNameW.restype = wintypes.DWORD
+                    
+                    output_buf_size = 0
+                    while True:
+                        output_buf = ctypes.create_unicode_buffer(output_buf_size)
+                        needed = _GetShortPathNameW(path, output_buf, output_buf_size)
+                        if output_buf_size >= needed:
+                            return output_buf.value
+                        else:
+                            output_buf_size = needed
+                except Exception:
+                    # Fallback: just return the path as-is
+                    return path
         # Try to find bash in PATH
         bash = shutil.which("bash")
         if bash:
@@ -625,9 +643,7 @@ def check_skillkit() -> bool:
     """Check if SkillKit is available."""
     try:
         result = subprocess.run(
-            "npx skillkit@latest --version",
-            shell=True,
-            executable=BASH_EXECUTABLE,
+            [BASH_EXECUTABLE, "-c", "npx skillkit@latest --version"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -641,9 +657,7 @@ def search_skills(query: str) -> list[dict]:
     """Search for skills using SkillKit."""
     try:
         result = subprocess.run(
-            f'npx skillkit@latest find "{query}" --json',
-            shell=True,
-            executable=BASH_EXECUTABLE,
+            [BASH_EXECUTABLE, "-c", f'npx skillkit@latest find "{query}" --json'],
             capture_output=True,
             text=True,
             timeout=30,
@@ -693,9 +707,7 @@ def install_skill(repo: str, skill_name: str = None) -> bool:
             cmd += f' --skills {skill_name}'
         
         result = subprocess.run(
-            cmd,
-            shell=True,
-            executable=BASH_EXECUTABLE,
+            [BASH_EXECUTABLE, "-c", cmd],
             capture_output=True,
             text=True,
             timeout=60,
@@ -710,9 +722,7 @@ def list_installed_skills() -> list[str]:
     """List installed skills."""
     try:
         result = subprocess.run(
-            "npx skillkit@latest list",
-            shell=True,
-            executable=BASH_EXECUTABLE,
+            [BASH_EXECUTABLE, "-c", "npx skillkit@latest list"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -1161,30 +1171,43 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
 
     # Write prompt to a file (safer than passing via command line)
     prompt_file.write_text(prompt, encoding="utf-8")
+    
+    # Verify the file was written correctly
+    if not prompt_file.exists() or prompt_file.stat().st_size == 0:
+        return {"success": False, "error": "Failed to write prompt file"}
 
     console.print()
     console.print(Panel(
         f"[#e2e8f0]Project directory:[/] [#22d3ee]{project_dir}[/]\n"
         f"[#e2e8f0]Prompt saved to:[/] [#22d3ee]{prompt_file.name}[/]\n"
+        f"[#e2e8f0]Prompt size:[/] [#22d3ee]{len(prompt)} chars ({prompt_file.stat().st_size} bytes)[/]\n"
         f"[#e2e8f0]Output log:[/] [#22d3ee]{output_log.name}[/]",
         title="[bold #7c3aed]Gemini CLI[/]",
         border_style="#4b5563",
     ))
+    
+    # Show prompt preview
+    console.print()
+    console.print("[#9ca3af]Prompt preview (first 200 chars):[/]")
+    preview = prompt[:200].replace("\n", " ")
+    console.print(f"[#6b7280]{preview}...[/]")
+    console.print()
 
-    # Build the gemini command — always use bash syntax
-    cmd = f'cd "{project_dir}" && gemini -p "$(cat "{prompt_file.name}")" --yolo > "{output_log.name}" 2>&1'
+    # Build the gemini command using stdin redirection (more reliable than -p with command substitution)
+    # This avoids issues with special characters, quotes, and command length limits
+    cmd = f'cd "{project_dir}" && cat "{prompt_file.name}" | gemini --yolo > "{output_log.name}" 2>&1'
 
     console.print()
     console.print("[#9ca3af]Starting Gemini CLI in bash...[/]")
-    console.print(f"[#6b7280]Command: gemini --yolo (in {project_dir})[/]")
+    console.print(f"[#6b7280]Command: cat prompt | gemini --yolo[/]")
+    console.print(f"[#6b7280]Working dir: {project_dir}[/]")
     console.print(f"[#6b7280]Shell: {BASH_EXECUTABLE}[/]")
     console.print()
 
     try:
+        # Use list form to avoid shell parsing issues with spaces in executable path
         process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable=BASH_EXECUTABLE,
+            [BASH_EXECUTABLE, "-c", cmd],
             cwd=str(project_dir),
         )
 
@@ -1219,6 +1242,18 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
                 remaining = f.read()
                 if remaining.strip():
                     console.print(remaining, end="")
+        
+        console.print()
+        console.print()
+        
+        # Verify we got output
+        if output_log.exists() and output_log.stat().st_size > 0:
+            console.print("[#22c55e]✓ Gemini CLI completed successfully[/]")
+            console.print(f"[#9ca3af]Output size: {output_log.stat().st_size} bytes[/]")
+        else:
+            console.print("[#ef4444]⚠ Warning: No output generated. Check if prompt was properly injected.[/]")
+            console.print(f"[#9ca3af]Check prompt file: {prompt_file}[/]")
+            console.print(f"[#9ca3af]Check output log: {output_log}[/]")
 
         return {
             "success": True,
@@ -1386,13 +1421,11 @@ def post_execution(project_dir: Path, files_written: list[str]):
                 for pm in ["pnpm", "npm"]:
                     if shutil.which(pm):
                         result = subprocess.run(
-                            f"{pm} install",
+                            [BASH_EXECUTABLE, "-c", f"{pm} install"],
                             cwd=str(project_dir),
                             capture_output=True,
                             text=True,
                             timeout=180,
-                            shell=True,
-                            executable=BASH_EXECUTABLE,
                         )
                         if result.returncode == 0:
                             console.print(f"[#22c55e]Dependencies installed with {pm}[/]")
@@ -1401,13 +1434,11 @@ def post_execution(project_dir: Path, files_written: list[str]):
                         break
             elif project_type == "python":
                 result = subprocess.run(
-                    f"{sys.executable} -m pip install -r requirements.txt",
+                    [BASH_EXECUTABLE, "-c", f"{sys.executable} -m pip install -r requirements.txt"],
                     cwd=str(project_dir),
                     capture_output=True,
                     text=True,
                     timeout=180,
-                    shell=True,
-                    executable=BASH_EXECUTABLE,
                 )
                 if result.returncode == 0:
                     console.print("[#22c55e]Dependencies installed[/]")
@@ -1464,10 +1495,8 @@ def start_dev(project_dir: Path, project_type: str):
         # Convert list command to string for bash execution
         cmd_str = " ".join(cmd) if isinstance(cmd, list) else cmd
         process = subprocess.Popen(
-            cmd_str,
+            [BASH_EXECUTABLE, "-c", cmd_str],
             cwd=str(project_dir),
-            shell=True,
-            executable=BASH_EXECUTABLE,
         )
         console.print(f"[bold #22c55e]Dev server running at http://localhost:{port}[/]")
         console.print()
@@ -1591,6 +1620,29 @@ def main():
 
     # Step 8: Build optimized prompt with agent skills and Gemini-Kit agent
     prompt = build_prompt(message, intake, qa, approach, user, skills, mcps, agent_skills, gemini_kit_agent)
+    
+    # Show prompt composition summary
+    console.print()
+    console.print("[#9ca3af]Prompt composition:[/]")
+    components = []
+    if gemini_kit_agent:
+        components.append(f"✓ Gemini-Kit Agent ({gemini_kit_agent['name']})")
+    components.append(f"✓ User intent & context")
+    if qa:
+        components.append(f"✓ Clarifications ({len(qa)} Q&A)")
+    if approach:
+        components.append(f"✓ Approach strategy")
+    if skills:
+        components.append(f"✓ Skills ({len(skills)} applied)")
+    if agent_skills:
+        components.append(f"✓ Agent Skills ({len(agent_skills)} installed)")
+    if mcps:
+        components.append(f"✓ MCP Tools ({len(mcps)} available)")
+    
+    for comp in components:
+        console.print(f"  [#6b7280]{comp}[/]")
+    console.print(f"  [bold #22d3ee]Total: {len(prompt)} characters[/]")
+    console.print()
 
     # Step 9: Choose execution method
     project_dir = get_project_dir_from_intent(intake.get("interpreted_intent", message))
@@ -1619,6 +1671,29 @@ def main():
 
     if not exec_method:
         exec_method = "prompt"
+    
+    # Option to preview prompt before execution (for CLI method)
+    if exec_method == "cli":
+        if questionary.confirm(
+            "Preview the full prompt before sending to Gemini?",
+            default=False,
+            style=PROMPT_STYLE,
+        ).ask():
+            console.print()
+            console.print(Rule("[bold #7c3aed]Prompt Preview[/]", style="#4b5563"))
+            console.print()
+            # Show first 1000 chars
+            preview_len = min(1000, len(prompt))
+            console.print(Panel(
+                f"[#e2e8f0]{prompt[:preview_len]}[/]\n\n[#9ca3af]... (total {len(prompt)} chars)[/]",
+                border_style="#4b5563",
+                padding=(1, 2),
+            ))
+            console.print()
+            
+            if not questionary.confirm("Continue with execution?", default=True, style=PROMPT_STYLE).ask():
+                console.print("[#eab308]Execution cancelled.[/]")
+                return
 
     if exec_method == "prompt":
         console.print()
