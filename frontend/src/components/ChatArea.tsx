@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Sparkles, Zap, ArrowUp } from 'lucide-react';
 import { Message as MessageComponent } from './Message';
 import { ProQuestionnaire } from './ProQuestionnaire';
+import { ApproachCard } from './ApproachCard';
 import { StatusBar } from './StatusBar';
 import { VoiceMode } from './VoiceMode/VoiceMode';
-import type { Message, ClarificationQuestion } from '../types';
+import type { Message, ClarificationQuestion, ApproachProposal } from '../types';
 
 interface ChatAreaProps {
     messages: Message[];
@@ -12,6 +13,9 @@ interface ChatAreaProps {
     status: string | null;
     clarificationQuestions: ClarificationQuestion[] | null;
     onClarificationResponse: (answers: Record<string, string>) => void;
+    approachProposals: ApproachProposal[] | null;
+    approachContextSummary: string | null;
+    onApproachSelection: (approach: ApproachProposal) => void;
     error: string | null;
     hasProject: boolean;
     onNewChat: () => void;
@@ -19,7 +23,8 @@ interface ChatAreaProps {
 
 const STATUS_LABELS: Record<string, string> = {
     analyzing: 'Understanding request...',
-    clarifying: 'Asking clarifying questions...',
+    clarifying: 'Preparing questions...',
+    brainstorming: 'Exploring approaches...',
     optimizing: 'Optimizing prompt...',
     executing: 'Generating response...',
     complete: 'Ready',
@@ -27,7 +32,8 @@ const STATUS_LABELS: Record<string, string> = {
 
 export function ChatArea({
     messages, onSendMessage, status, clarificationQuestions,
-    onClarificationResponse, error, hasProject, onNewChat
+    onClarificationResponse, approachProposals, approachContextSummary,
+    onApproachSelection, error, hasProject, onNewChat
 }: ChatAreaProps) {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -36,7 +42,7 @@ export function ChatArea({
     // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, status, clarificationQuestions]);
+    }, [messages, status, clarificationQuestions, approachProposals]);
 
     // Auto-resize
     useEffect(() => {
@@ -145,6 +151,16 @@ export function ChatArea({
                                 questions={clarificationQuestions}
                                 lastIntent={lastAssistantMessage?.metadata?.interpreted_intent}
                                 onSubmit={onClarificationResponse}
+                            />
+                        </div>
+                    )}
+
+                    {approachProposals && approachProposals.length > 0 && (
+                        <div className="animate-slide-up py-4">
+                            <ApproachCard
+                                approaches={approachProposals}
+                                contextSummary={approachContextSummary}
+                                onSelect={onApproachSelection}
                             />
                         </div>
                     )}

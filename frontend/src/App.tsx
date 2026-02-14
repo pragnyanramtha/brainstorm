@@ -23,7 +23,8 @@ export default function App() {
 
     const {
         messages, setMessages, sendMessage, sendClarificationResponse,
-        status, isConnected, clarificationQuestions, error
+        sendApproachSelection, status, isConnected, clarificationQuestions,
+        approachProposals, approachContextSummary, error
     } = useChat(activeProject?.id || null);
 
     // Check onboarding status
@@ -94,6 +95,9 @@ export default function App() {
                     status={status}
                     clarificationQuestions={clarificationQuestions}
                     onClarificationResponse={sendClarificationResponse}
+                    approachProposals={approachProposals}
+                    approachContextSummary={approachContextSummary}
+                    onApproachSelection={sendApproachSelection}
                     error={error}
                     hasProject={!!activeProject}
                     onNewChat={handleNewChat}

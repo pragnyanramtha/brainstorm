@@ -73,6 +73,16 @@ export interface ClarificationQuestion {
     why_it_matters: string;
 }
 
+export interface ApproachProposal {
+    id: string;
+    title: string;
+    description: string;
+    pros: string[];
+    cons: string[];
+    effort_level: 'low' | 'medium' | 'high';
+    recommended: boolean;
+}
+
 export interface Skill {
     id: number;
     name: string;
@@ -112,17 +122,21 @@ export interface OnboardingStatus {
 
 // WebSocket message types
 export interface WSMessageOutgoing {
-    type: 'message' | 'clarification_response';
+    type: 'message' | 'clarification_response' | 'approach_selection';
     content?: string;
     answers?: Record<string, string>;
+    approach?: ApproachProposal;
+    clarification_answers?: Record<string, string>;
 }
 
 export interface WSMessageIncoming {
-    type: 'message' | 'clarification' | 'status' | 'error' | 'file_update';
+    type: 'message' | 'clarification' | 'approach_proposal' | 'status' | 'error' | 'file_update';
     role?: 'assistant' | 'system';
     content?: string;
     metadata?: MessageMetadata;
     questions?: ClarificationQuestion[];
+    approaches?: ApproachProposal[];
+    context_summary?: string;
     state?: string;
     message?: string;
 }

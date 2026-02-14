@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createWebSocket } from '../api';
-import type { Message, WSMessageIncoming, ClarificationQuestion } from '../types';
+import type { Message, WSMessageIncoming, ClarificationQuestion, ApproachProposal } from '../types';
 
 interface UseChatReturn {
     messages: Message[];
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
     sendMessage: (content: string) => void;
     sendClarificationResponse: (answers: Record<string, string>) => void;
+    sendApproachSelection: (approach: ApproachProposal) => void;
     status: string | null;
     isConnected: boolean;
     clarificationQuestions: ClarificationQuestion[] | null;
+    approachProposals: ApproachProposal[] | null;
+    approachContextSummary: string | null;
     error: string | null;
 }
 
@@ -18,9 +21,12 @@ export function useChat(projectId: string | null): UseChatReturn {
     const [status, setStatus] = useState<string | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [clarificationQuestions, setClarificationQuestions] = useState<ClarificationQuestion[] | null>(null);
+    const [approachProposals, setApproachProposals] = useState<ApproachProposal[] | null>(null);
+    const [approachContextSummary, setApproachContextSummary] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<number | null>(null);
+    const lastClarificationAnswersRef = useRef<Record<string, string> | null>(null);
 
     const connect = useCallback(() => {
         if (!projectId) return;
@@ -58,6 +64,14 @@ export function useChat(projectId: string | null): UseChatReturn {
 
                     case 'clarification':
                         setClarificationQuestions(data.questions || null);
+                        setApproachProposals(null);
+                        setStatus(null);
+                        break;
+
+                    case 'approach_proposal':
+                        setApproachProposals(data.approaches || null);
+                        setApproachContextSummary(data.context_summary || null);
+                        setClarificationQuestions(null);
                         setStatus(null);
                         break;
 
@@ -125,8 +139,25 @@ export function useChat(projectId: string | null): UseChatReturn {
     const sendClarificationResponse = useCallback((answers: Record<string, string>) => {
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
+        // Save answers so we can send them back with approach selection
+        lastClarificationAnswersRef.current = answers;
+
         wsRef.current.send(JSON.stringify({ type: 'clarification_response', answers }));
         setClarificationQuestions(null);
+        setStatus('brainstorming');
+    }, []);
+
+    const sendApproachSelection = useCallback((approach: ApproachProposal) => {
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+
+        wsRef.current.send(JSON.stringify({
+            type: 'approach_selection',
+            approach,
+            clarification_answers: lastClarificationAnswersRef.current || {},
+        }));
+        setApproachProposals(null);
+        setApproachContextSummary(null);
+        lastClarificationAnswersRef.current = null;
         setStatus('optimizing');
     }, []);
 
@@ -135,9 +166,12 @@ export function useChat(projectId: string | null): UseChatReturn {
         setMessages,
         sendMessage,
         sendClarificationResponse,
+        sendApproachSelection,
         status,
         isConnected,
         clarificationQuestions,
+        approachProposals,
+        approachContextSummary,
         error,
     };
 }
