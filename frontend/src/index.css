@@ -21,7 +21,7 @@
   }
 
   body {
-    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-primary/30 selection:text-primary-dim;
+    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-accent/30 selection:text-accent;
   }
 
   #root {
@@ -33,7 +33,7 @@
 
   /* Material 3 Surface Combinations */
   .surface-container {
-    @apply bg-surface-container border border-surface-border;
+    @apply bg-surface-raised border border-surface-border;
   }
 
   .surface-raised {
@@ -57,11 +57,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-surface-raised-high/50 border-[3px] border-solid border-transparent bg-clip-content rounded-full transition-colors;
+  @apply bg-surface-overlay/50 border-[3px] border-solid border-transparent bg-clip-content rounded-full transition-colors;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-surface-raised-high;
+  @apply bg-surface-overlay;
 }
 
 /* --- Markdown Content Styles --- */
@@ -98,11 +98,11 @@
 }
 
 .markdown-content code {
-  @apply font-mono text-[0.9em] bg-surface-raised-high/50 px-1.5 py-0.5 rounded text-text-primary border border-surface-border;
+  @apply font-mono text-[0.9em] bg-surface-overlay/50 px-1.5 py-0.5 rounded text-text-primary border border-surface-border;
 }
 
 .markdown-content pre {
-  @apply my-4 rounded-lg overflow-x-auto bg-surface-container border border-surface-border p-4;
+  @apply my-4 rounded-lg overflow-x-auto bg-surface-raised border border-surface-border p-4;
 }
 
 .markdown-content pre code {
@@ -122,11 +122,11 @@
 }
 
 .markdown-content blockquote {
-  @apply border-l-[3px] border-primary/50 pl-4 my-4 text-text-muted italic bg-surface-container/30 py-2 pr-2 rounded-r;
+  @apply border-l-[3px] border-accent/50 pl-4 my-4 text-text-muted italic bg-surface-raised/30 py-2 pr-2 rounded-r;
 }
 
 .markdown-content a {
-  @apply text-primary hover:text-primary-hover underline decoration-primary/30 underline-offset-2 transition-colors;
+  @apply text-accent hover:text-blue-700 underline decoration-accent/30 underline-offset-2 transition-colors;
 }
 
 .markdown-content strong {

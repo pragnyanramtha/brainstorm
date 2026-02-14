@@ -1,0 +1,17 @@
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 4 modules transformed.
+[31m✗[39m Build failed in 1.59s
+[31merror during build:
+[31m[vite:css] [postcss] C:/Users/Pragnyan/dev/brainstorm/middle-manager/frontend/src/index.css:129:3: The `hover:text-accent-hover` class does not exist. If `hover:text-accent-hover` is a custom class, make sure it is defined within a `@layer` directive.[31m
+file: [36mC:/Users/Pragnyan/dev/brainstorm/middle-manager/frontend/src/index.css:129:2[31m
+    at Input.error (C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\postcss@8.5.6\node_modules\postcss\lib\input.js:135:16)
+    at AtRule.error (C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\postcss@8.5.6\node_modules\postcss\lib\node.js:146:32)
+    at processApply (C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\tailwindcss@3.4.19\node_modules\tailwindcss\lib\lib\expandApplyAtRules.js:380:29)
+    at C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\tailwindcss@3.4.19\node_modules\tailwindcss\lib\lib\expandApplyAtRules.js:551:9
+    at C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\tailwindcss@3.4.19\node_modules\tailwindcss\lib\processTailwindFeatures.js:55:50
+    at async plugins (C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\tailwindcss@3.4.19\node_modules\tailwindcss\lib\plugin.js:38:17)
+    at async LazyResult.runAsync (C:\Users\Pragnyan\dev\brainstorm\middle-manager\frontend\node_modules\.pnpm\postcss@8.5.6\node_modules\postcss\lib\lazy-result.js:293:11)
+    at async runPostCSS (file:///C:/Users/Pragnyan/dev/brainstorm/middle-manager/frontend/node_modules/.pnpm/vite@6.4.1_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:43853:21)
+    at async compilePostCSS (file:///C:/Users/Pragnyan/dev/brainstorm/middle-manager/frontend/node_modules/.pnpm/vite@6.4.1_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:43823:18)
+    at async compileCSS (file:///C:/Users/Pragnyan/dev/brainstorm/middle-manager/frontend/node_modules/.pnpm/vite@6.4.1_jiti@1.21.7/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:43678:27)[39m

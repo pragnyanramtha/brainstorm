@@ -7,6 +7,7 @@ import { ChatArea } from './components/ChatArea';
 import { FileExplorer } from './components/FileExplorer';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { SettingsModal } from './components/SettingsModal';
+import { VoiceMode } from './components/VoiceMode/VoiceMode';
 import type { OnboardingStatus } from './types';
 
 export default function App() {
@@ -113,11 +114,13 @@ export default function App() {
             )}
 
             {/* Connection Status Indicator (Subtle overlay) */}
-            {!isConnected && !isLoading && (
+            {!isConnected && !isLoading && activeProject && (
                 <div className="fixed top-4 right-4 z-50 bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-xs font-medium animate-pulse backdrop-blur-sm">
                     Reconnecting...
                 </div>
             )}
+
+            <VoiceMode />
         </div>
     );
 }
