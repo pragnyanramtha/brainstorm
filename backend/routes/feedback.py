@@ -1,66 +1,75 @@
 """
-Feedback routes — user ratings and comments for responses.
+Feedback routes.
+Collect user feedback on responses to improve skill scoring.
 """
-import json
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.database import get_session, Feedback, Message, Skill
+from backend.database import get_session, Feedback, Message, Project, Skill
 
-router = APIRouter(tags=["feedback"])
+router = APIRouter(prefix="/api/feedback", tags=["feedback"])
 
 
-@router.post("/feedback")
-async def submit_feedback(body: dict, session: AsyncSession = Depends(get_session)):
-    """Submit rating (1-5) + optional comment for a message. Updates skill effectiveness."""
-    message_id = body.get("message_id")
-    project_id = body.get("project_id")
-    rating = body.get("rating")
-    comment = body.get("comment")
+class FeedbackCreate(BaseModel):
+    message_id: str
+    project_id: str
+    rating: int  # 1-5
+    comment: str = None
 
-    if not message_id or not project_id or not rating:
-        raise HTTPException(status_code=400, detail="message_id, project_id, and rating are required")
 
-    if rating < 1 or rating > 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
-
-    # Get message metadata for skills used
-    result = await session.execute(select(Message).where(Message.id == message_id))
-    message = result.scalars().first()
-    if not message:
+@router.post("")
+async def submit_feedback(
+    data: FeedbackCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Submit feedback on a message.
+    Also updates effectiveness scores for skills used in that message.
+    """
+    # Verify message exists
+    msg_result = await session.execute(
+        select(Message).where(Message.id == data.message_id)
+    )
+    msg = msg_result.scalars().first()
+    
+    if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
 
-    metadata = message.get_metadata()
-    skills_used = metadata.get("skills_applied", [])
-    model_used = metadata.get("model_used", "unknown")
+    metadata = msg.get_metadata()
+    skills_used_names = metadata.get("skills_applied", [])
+    model_used = metadata.get("model_used")
 
     # Save feedback
-    fb = Feedback(
-        message_id=message_id,
-        project_id=project_id,
-        rating=rating,
-        comment=comment,
-        skills_used=json.dumps(skills_used),
+    feedback = Feedback(
+        message_id=data.message_id,
+        project_id=data.project_id,
+        rating=data.rating,
+        comment=data.comment,
+        skills_used=msg.metadata_json,  # Store full metadata snapshot
         model_used=model_used,
     )
-    session.add(fb)
+    session.add(feedback)
 
-    # Update skill effectiveness scores based on feedback
-    if skills_used:
-        for skill_name in skills_used:
-            skill_result = await session.execute(select(Skill).where(Skill.name == skill_name))
-            skill = skill_result.scalars().first()
-            if skill:
-                if rating >= 4:
-                    skill.positive_feedback_count += 1
-                elif rating <= 2:
-                    skill.negative_feedback_count += 1
+    # Update skill scores
+    # If rating >= 4, positive feedback. If <= 2, negative.
+    if data.rating >= 4 or data.rating <= 2:
+        skills_result = await session.execute(
+            select(Skill).where(Skill.name.in_(skills_used_names))
+        )
+        skills = skills_result.scalars().all()
 
-                total = skill.positive_feedback_count + skill.negative_feedback_count
-                if total > 0:
-                    skill.effectiveness_score = skill.positive_feedback_count / total
+        for skill in skills:
+            if data.rating >= 4:
+                skill.positive_feedback_count += 1
+                # Boost score slightly
+                skill.effectiveness_score = min(1.0, skill.effectiveness_score + 0.05)
+            else:
+                skill.negative_feedback_count += 1
+                # Penalty
+                skill.effectiveness_score = max(0.1, skill.effectiveness_score - 0.05)
 
     await session.commit()
-
-    return {"status": "saved", "id": fb.id}
+    
+    return {"status": "feedback_saved"}

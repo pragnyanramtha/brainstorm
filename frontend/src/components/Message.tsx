@@ -38,7 +38,7 @@ function CodeBlock({ children, className }: { children: any; className?: string 
             </div>
 
             {/* Code */}
-            <div className="overflow-x-auto p-4 bg-surface-raised font-mono text-sm leading-relaxed text-text-secondary">
+            <div className="overflow-x-auto p-4 bg-surface-raised font-mono text-sm leading-relaxed text-text-secondary whitespace-pre">
                 {/* We render children directly which is the code text */}
                 <code>{code}</code>
             </div>
@@ -67,8 +67,8 @@ export function Message({ message }: MessageProps) {
             <div className={`max-w-[85%] sm:max-w-[75%] ${isUser ? '' : 'w-full'}`}>
                 <div
                     className={`relative px-5 py-3.5 text-sm leading-7 shadow-sm transition-all duration-200 ${isUser
-                            ? 'bg-accent text-white rounded-2xl rounded-tr-sm shadow-[0_2px_10px_-2px_rgba(37,99,235,0.2)]'
-                            : 'bg-surface-raised/80 border border-white/5 backdrop-blur-sm text-text-primary rounded-2xl rounded-tl-sm hover:border-white/10'
+                        ? 'bg-accent text-white rounded-2xl rounded-tr-sm shadow-[0_2px_10px_-2px_rgba(37,99,235,0.2)]'
+                        : 'bg-surface-raised/80 border border-white/5 backdrop-blur-sm text-text-primary rounded-2xl rounded-tl-sm hover:border-white/10'
                         }`}
                 >
                     {isAssistant ? (

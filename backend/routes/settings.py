@@ -1,98 +1,110 @@
 """
-Settings routes — API key management, user preferences.
+Settings and onboarding routes.
+Manage API keys, user profile, and system status.
 """
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.config import get_api_keys, save_api_keys, mask_key
 from backend.database import get_session, User
+from backend.config import get_api_keys, save_api_keys, mask_key
+from backend.memory.user_profile import get_user_profile, ensure_user_exists, extract_profile_from_chat
 
-router = APIRouter(tags=["settings"])
+router = APIRouter(prefix="/api", tags=["settings"])
+
+
+class APIKeyUpdate(BaseModel):
+    gemini_api_key: Optional[str] = None
+    anthropic_api_key: Optional[str] = None
+
+
+class ProfileUpdate(BaseModel):
+    technical_level: Optional[str] = None
+    domain: Optional[str] = None
+    role: Optional[str] = None
+    stack: Optional[list[str]] = None
+    communication_preferences: Optional[dict] = None
+    pet_peeves: Optional[list[str]] = None
+    positive_patterns: Optional[list[str]] = None
 
 
 @router.get("/settings")
-async def get_settings(session: AsyncSession = Depends(get_session)):
-    """Return current settings with masked API keys."""
+async def get_settings_route(session: AsyncSession = Depends(get_session)):
+    """Get current settings (masked keys, profile)."""
     keys = get_api_keys()
-
-    # Get user profile
-    result = await session.execute(select(User).where(User.id == 1))
-    user = result.scalars().first()
-
+    
+    profile = await get_user_profile(session)
+    
     return {
         "api_keys": {
             "gemini": {
                 "configured": bool(keys.gemini_api_key),
-                "masked": mask_key(keys.gemini_api_key),
+                "masked": mask_key(keys.gemini_api_key)
             },
             "anthropic": {
                 "configured": bool(keys.anthropic_api_key),
-                "masked": mask_key(keys.anthropic_api_key),
-            },
+                "masked": mask_key(keys.anthropic_api_key)
+            }
         },
-        "user_profile": user.to_dict() if user else None,
+        "user_profile": profile
     }
 
 
 @router.put("/settings")
-async def update_settings(body: dict, session: AsyncSession = Depends(get_session)):
-    """Update API keys and/or preferences."""
-    # Handle API keys
-    gemini_key = body.get("gemini_api_key")
-    anthropic_key = body.get("anthropic_api_key")
-
-    if gemini_key is not None or anthropic_key is not None:
-        save_api_keys(gemini_key=gemini_key, anthropic_key=anthropic_key)
-
+async def update_settings_key(
+    data: APIKeyUpdate,
+    session: AsyncSession = Depends(get_session),
+):
+    """Update API keys."""
+    save_api_keys(
+        gemini_key=data.gemini_api_key,
+        anthropic_key=data.anthropic_api_key
+    )
     return {"status": "updated"}
 
 
 @router.get("/onboarding/status")
 async def onboarding_status(session: AsyncSession = Depends(get_session)):
-    """Check if user has completed onboarding."""
+    """Check if onboarding is needed."""
     keys = get_api_keys()
+    profile = await get_user_profile(session)
+    
     has_keys = bool(keys.gemini_api_key)
-
-    result = await session.execute(select(User).where(User.id == 1))
-    user = result.scalars().first()
-    has_profile = user is not None and user.technical_level != "semi_technical"
-
+    has_profile = bool(profile and profile.get("technical_level"))
+    
     return {
         "has_api_keys": has_keys,
         "has_profile": has_profile,
-        "onboarding_complete": has_keys and has_profile,
+        "onboarding_complete": has_keys and has_profile
     }
 
 
 @router.post("/onboarding/profile")
-async def save_profile(body: dict, session: AsyncSession = Depends(get_session)):
-    """Save or update user profile from onboarding."""
-    import json
-
-    result = await session.execute(select(User).where(User.id == 1))
-    user = result.scalars().first()
-
-    if not user:
-        user = User(id=1)
-        session.add(user)
-
-    if "technical_level" in body:
-        user.technical_level = body["technical_level"]
-    if "domain" in body:
-        user.domain = body["domain"]
-    if "role" in body:
-        user.role = body["role"]
-    if "stack" in body:
-        user.set_stack(body["stack"])
-    if "communication_preferences" in body:
-        user.set_communication_preferences(body["communication_preferences"])
-    if "pet_peeves" in body:
-        user.set_pet_peeves(body["pet_peeves"])
-    if "positive_patterns" in body:
-        user.set_positive_patterns(body["positive_patterns"])
-
+async def create_profile(
+    data: ProfileUpdate,
+    session: AsyncSession = Depends(get_session),
+):
+    """Manually create/update user profile."""
+    user = await ensure_user_exists(session)
+    
+    if data.technical_level:
+        user.technical_level = data.technical_level
+    if data.domain:
+        user.domain = data.domain
+    if data.role:
+        user.role = data.role
+    if data.stack is not None:
+        user.set_stack(data.stack)
+    if data.communication_preferences:
+        user.set_communication_preferences(data.communication_preferences)
+    if data.pet_peeves is not None:
+        user.set_pet_peeves(data.pet_peeves)
+    if data.positive_patterns is not None:
+        user.set_positive_patterns(data.positive_patterns)
+        
     await session.commit()
     await session.refresh(user)
-
+    
     return user.to_dict()

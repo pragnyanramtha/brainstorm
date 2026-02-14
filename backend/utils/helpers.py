@@ -1,44 +1,39 @@
 """
-Shared utilities for Middle Manager AI.
+Utility functions used across the backend.
 """
+import os
+import re
 import uuid
-import datetime
-import subprocess
-import sys
 import platform
+import subprocess
+from pathlib import Path
 
 
 def generate_id() -> str:
-    return str(uuid.uuid4())
+    """Generate a short unique ID."""
+    return str(uuid.uuid4())[:8]
 
 
-def now_utc() -> datetime.datetime:
-    return datetime.datetime.utcnow()
+def slugify_name(name: str) -> str:
+    """Create a filesystem-safe slug from a name."""
+    s = name.lower()
+    s = re.sub(r'[^a-z0-9\s-]', '', s)
+    s = re.sub(r'[\s-]+', '-', s)
+    return s.strip('-') or 'untitled'
 
 
-def slugify(text: str, max_length: int = 50) -> str:
-    """Convert text to a filesystem-safe slug."""
-    import re
-    text = text.lower().strip()
-    text = re.sub(r'[^\w\s-]', '', text)
-    text = re.sub(r'[-\s]+', '-', text)
-    return text[:max_length].rstrip('-')
+def open_folder(path: Path):
+    """Open a folder in the OS file explorer."""
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    else:  # Linux
+        subprocess.Popen(["xdg-open", path])
 
 
-def open_folder_in_explorer(path: str):
-    """Open a folder in the system file manager."""
-    try:
-        if platform.system() == "Windows":
-            subprocess.Popen(["explorer", path])
-        elif platform.system() == "Darwin":
-            subprocess.Popen(["open", path])
-        else:
-            subprocess.Popen(["xdg-open", path])
-    except Exception:
-        pass
-
-
-def truncate_text(text: str, max_length: int = 500) -> str:
-    if len(text) <= max_length:
+def truncate_text(text: str, length: int = 100) -> str:
+    """Truncate text to a maximum length."""
+    if len(text) <= length:
         return text
-    return text[:max_length] + "..."
+    return text[:length] + "..."
