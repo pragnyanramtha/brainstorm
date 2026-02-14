@@ -23,7 +23,7 @@ export default function App() {
 
     const {
         messages, setMessages, sendMessage, sendClarificationResponse,
-        sendApproachSelection, status, isConnected, clarificationQuestions,
+        sendApproachSelection, status, statusDetail, isConnected, clarificationQuestions,
         approachProposals, approachContextSummary, error
     } = useChat(activeProject?.id || null);
 
@@ -93,6 +93,7 @@ export default function App() {
                     messages={messages}
                     onSendMessage={sendMessage}
                     status={status}
+                    statusDetail={statusDetail}
                     clarificationQuestions={clarificationQuestions}
                     onClarificationResponse={sendClarificationResponse}
                     approachProposals={approachProposals}

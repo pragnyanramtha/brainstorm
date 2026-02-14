@@ -36,6 +36,7 @@ function groupProjects(projects: Project[]) {
     return groups.filter(g => g.items.length > 0);
 }
 
+// ... imports
 export function Sidebar({
     projects, activeProjectId, onSelectProject, onNewChat, onArchiveProject, onRenameProject, onOpenSettings
 }: SidebarProps) {
@@ -58,42 +59,40 @@ export function Sidebar({
     };
 
     return (
-        <aside className="w-[260px] border-r border-surface-border flex flex-col flex-shrink-0 bg-surface-raised/50 h-full backdrop-blur-sm">
+        <aside className="w-[260px] border-r border-slate-200 flex flex-col flex-shrink-0 bg-slate-50 h-full">
             {/* Header */}
-            <div className="p-4 border-b border-surface-border/50">
+            <div className="p-4 border-b border-slate-200">
                 <button
                     onClick={onNewChat}
-                    className="group w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-accent text-white shadow-lg shadow-accent/20 hover:bg-accent-hover hover:shadow-accent/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-white shadow-sm hover:bg-slate-800 transition-all duration-200"
                 >
-                    <Plus size={18} />
-                    <span className="text-sm font-medium">New Project</span>
+                    <Plus size={16} />
+                    <span className="text-sm font-semibold">New Project</span>
                 </button>
             </div>
 
             {/* Project List */}
-            <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-6 mt-3">
+            <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-6 mt-4">
                 {groups.map(group => (
-                    <div key={group.label}>
-                        <div className="px-3 mb-2 flex items-center gap-2">
-                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider opacity-80">
+                    <div key={group.label} className="px-2">
+                        <div className="px-2 mb-2 flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
                                 {group.label}
                             </span>
-                            <div className="h-px bg-surface-border flex-1 opacity-50" />
                         </div>
 
                         <div className="space-y-0.5">
                             {group.items.map(project => (
                                 <div
                                     key={project.id}
-                                    className={`group relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${project.id === activeProjectId
-                                        ? 'bg-surface-overlay text-text-primary shadow-sm'
-                                        : 'text-text-secondary hover:bg-surface-overlay/50 hover:text-text-primary'
+                                    className={`group relative flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors ${project.id === activeProjectId
+                                        ? 'bg-slate-200 text-slate-900'
+                                        : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'
                                         }`}
                                     onClick={() => onSelectProject(project.id)}
                                     onDoubleClick={() => handleDoubleClick(project)}
                                 >
-                                    <MessageSquare size={16} className={`flex-shrink-0 transition-colors ${project.id === activeProjectId ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'
-                                        }`} />
+                                    <MessageSquare size={14} className={`${project.id === activeProjectId ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-500'}`} />
 
                                     {editingId === project.id ? (
                                         <input
@@ -104,7 +103,7 @@ export function Sidebar({
                                                 if (e.key === 'Enter') handleRename(project.id);
                                                 if (e.key === 'Escape') setEditingId(null);
                                             }}
-                                            className="flex-1 bg-transparent border-b border-accent outline-none text-sm text-text-primary p-0"
+                                            className="flex-1 bg-transparent border-b border-slate-900 outline-none text-sm text-slate-900 p-0"
                                             autoFocus
                                             onClick={e => e.stopPropagation()}
                                         />
@@ -112,11 +111,9 @@ export function Sidebar({
                                         <span className="flex-1 truncate text-sm font-medium">{project.name}</span>
                                     )}
 
-                                    {/* Hover Actions */}
-                                    <div className={`flex items-center gap-1 transition-opacity duration-200 ${menuId === project.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                                        }`}>
+                                    <div className={`flex items-center gap-1 transition-opacity ${menuId === project.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                                         <button
-                                            className="p-1 rounded-md hover:bg-surface-border text-text-muted hover:text-text-primary transition-colors"
+                                            className="p-1 rounded hover:bg-slate-300/50 text-slate-400 hover:text-slate-900"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setMenuId(menuId === project.id ? null : project.id);
@@ -126,11 +123,10 @@ export function Sidebar({
                                         </button>
                                     </div>
 
-                                    {/* Context Menu */}
                                     {menuId === project.id && (
-                                        <div className="absolute right-2 top-full mt-1 z-50 bg-surface-overlay border border-surface-border rounded-lg shadow-xl py-1 transform origin-top-right animate-scale-in min-w-[140px]">
+                                        <div className="absolute right-2 top-full mt-1 z-50 bg-white border border-slate-200 rounded-lg shadow-xl py-1 min-w-[140px] animate-scale-in">
                                             <button
-                                                className="w-full px-3 py-1.5 text-left text-xs font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary flex items-center gap-2 transition-colors"
+                                                className="w-full px-3 py-1.5 text-left text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDoubleClick(project);
@@ -140,9 +136,9 @@ export function Sidebar({
                                                 <LayoutGrid size={14} />
                                                 Rename
                                             </button>
-                                            <div className="h-px bg-white/5 my-1" />
+                                            <div className="h-px bg-slate-100 my-1" />
                                             <button
-                                                className="w-full px-3 py-1.5 text-left text-xs font-medium text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                                                className="w-full px-3 py-1.5 text-left text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     onArchiveProject(project.id);
@@ -150,7 +146,7 @@ export function Sidebar({
                                                 }}
                                             >
                                                 <Trash2 size={14} />
-                                                Archive Project
+                                                Archive
                                             </button>
                                         </div>
                                     )}
@@ -159,36 +155,24 @@ export function Sidebar({
                         </div>
                     </div>
                 ))}
-
-                {projects.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                        <div className="w-12 h-12 rounded-full bg-surface-raised border border-surface-border flex items-center justify-center mb-3">
-                            <Plus size={20} className="text-text-muted" />
-                        </div>
-                        <p className="text-sm font-medium text-text-primary">No projects yet</p>
-                        <p className="text-xs text-text-muted mt-1">Start a new chat to begin</p>
-                    </div>
-                )}
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-surface-border/50 bg-black/10">
+            <div className="p-3 border-t border-slate-200 bg-white">
                 <button
                     onClick={onOpenSettings}
-                    className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-surface-overlay transition-colors group"
+                    className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-slate-50 transition-colors group"
                 >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white font-bold text-xs shadow-lg">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold text-[10px] shadow-sm">
                         MM
                     </div>
                     <div className="flex-1 text-left">
-                        <div className="text-xs font-medium text-text-primary group-hover:text-white transition-colors">Middle Manager</div>
-                        <div className="text-[10px] text-text-muted">Pro Plan</div>
-                    </div>
-                    <div className="p-1.5 rounded-md hover:bg-white/10 text-text-muted hover:text-white transition-colors">
-                        <MoreHorizontal size={14} />
+                        <div className="text-xs font-semibold text-slate-900">Middle Manager</div>
+                        <div className="text-[10px] text-slate-500 font-medium">Professional Workspace</div>
                     </div>
                 </button>
             </div>
         </aside>
     );
 }
+

@@ -53,6 +53,9 @@ export interface MessageMetadata {
     task_type?: string;
     complexity?: number;
     interpreted_intent?: string;
+    project_dir?: string;
+    dev_server_url?: string;
+    files_created?: string[];
 }
 
 export interface Message {
@@ -138,6 +141,7 @@ export interface WSMessageIncoming {
     approaches?: ApproachProposal[];
     context_summary?: string;
     state?: string;
+    detail?: string;
     message?: string;
 }
 

@@ -6,12 +6,11 @@
 
 @layer base {
   :root {
-    /* M3 Dark Elevation (Surface Tints) */
-    --surface-1: #1E1F20;
-    --surface-2: #232426;
-    --surface-3: #28292A;
-    --surface-4: #2D2E30;
-    --surface-5: #323335;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
   }
 
   html {
@@ -21,7 +20,7 @@
   }
 
   body {
-    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-accent/30 selection:text-accent;
+    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-accent/10 selection:text-accent;
   }
 
   #root {
@@ -30,21 +29,19 @@
 }
 
 @layer utilities {
-
-  /* Material 3 Surface Combinations */
   .surface-container {
-    @apply bg-surface-raised border border-surface-border;
+    @apply bg-surface-container border border-surface-border;
   }
 
   .surface-raised {
     @apply bg-surface-raised border border-surface-border shadow-elevation-1;
   }
 
-  .glass-card {
-    /* Deprecated but kept for transition - remapping to M3 styles */
-    @apply bg-surface-raised/90 backdrop-blur-sm border border-surface-border shadow-elevation-2;
+  .card-clean {
+    @apply bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden;
   }
 }
+
 
 /* --- Scrollbar Styling (Google Style) --- */
 ::-webkit-scrollbar {

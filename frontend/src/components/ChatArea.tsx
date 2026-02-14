@@ -11,6 +11,7 @@ interface ChatAreaProps {
     messages: Message[];
     onSendMessage: (content: string) => void;
     status: string | null;
+    statusDetail: string | null;
     clarificationQuestions: ClarificationQuestion[] | null;
     onClarificationResponse: (answers: Record<string, string>) => void;
     approachProposals: ApproachProposal[] | null;
@@ -27,11 +28,12 @@ const STATUS_LABELS: Record<string, string> = {
     brainstorming: 'Exploring approaches...',
     optimizing: 'Optimizing prompt...',
     executing: 'Generating response...',
+    scaffolding: 'Building your project...',
     complete: 'Ready',
 };
 
 export function ChatArea({
-    messages, onSendMessage, status, clarificationQuestions,
+    messages, onSendMessage, status, statusDetail, clarificationQuestions,
     onClarificationResponse, approachProposals, approachContextSummary,
     onApproachSelection, error, hasProject, onNewChat
 }: ChatAreaProps) {
@@ -172,7 +174,12 @@ export function ChatArea({
                                 <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '150ms' }} />
                                 <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '300ms' }} />
                             </div>
-                            <span className="text-text-secondary text-sm font-medium">{STATUS_LABELS[status] || status}</span>
+                            <div className="flex flex-col">
+                                <span className="text-text-secondary text-sm font-medium">{STATUS_LABELS[status] || status}</span>
+                                {statusDetail && (
+                                    <span className="text-text-muted text-xs mt-0.5">{statusDetail}</span>
+                                )}
+                            </div>
                         </div>
                     )}
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, ArrowRight, Eye, EyeOff, Shield, Check, Cpu } from 'lucide-react';
+import { Activity, ArrowRight, Eye, EyeOff, Shield, Check, Terminal, Layout } from 'lucide-react';
 import { updateSettings } from '../api';
 
 interface WelcomeScreenProps {
@@ -28,8 +28,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
                 gemini_api_key: geminiKey.trim(),
                 anthropic_api_key: claudeKey.trim() || undefined,
             });
-            // Add a small delay for better UX
-            setTimeout(onComplete, 800);
+            setTimeout(onComplete, 500);
         } catch (e: any) {
             setError(e.message || 'Failed to verify and save API keys.');
             setSaving(false);
@@ -37,96 +36,88 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center bg-surface relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] opacity-40 animate-pulse" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px] opacity-30 animate-pulse" style={{ animationDelay: '2s' }} />
-            </div>
-
-            <div className="max-w-xl w-full relative z-10 p-6 animate-scale-in">
-                <div className="glass-card rounded-2xl border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
+        <div className="h-screen w-full flex items-center justify-center bg-surface-container relative">
+            <div className="max-w-md w-full p-6 animate-scale-in">
+                <div className="bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden">
                     {/* Header */}
-                    <div className="p-8 text-center border-b border-white/5 bg-surface-raised/30">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-glow transform rotate-3 hover:rotate-6 transition-transform duration-500">
-                            <Sparkles className="w-8 h-8 text-white" />
+                    <div className="p-8 pb-4 text-center">
+                        <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center mx-auto mb-6 shadow-sm">
+                            <Activity className="w-6 h-6 text-white" />
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Middle Manager AI</h1>
-                        <p className="text-text-secondary text-sm max-w-sm mx-auto leading-relaxed">
-                            Your local intelligent middleware. Connects you to advanced reasoning models while keeping your data safe on your machine.
+                        <h1 className="text-2xl font-semibold text-slate-900 mb-2 tracking-tight">Middle Manager</h1>
+                        <p className="text-slate-500 text-sm max-w-xs mx-auto leading-relaxed">
+                            Professional local middleware for connecting advanced reasoning models to your workflow.
                         </p>
                     </div>
 
-                    <div className="p-8 space-y-8 bg-surface/50">
-                        {/* Features Grid */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-2 p-3 rounded-xl bg-surface-raised/50 border border-white/5 hover:bg-surface-raised/80 transition-colors">
-                                <Shield className="w-5 h-5 text-emerald-400" />
-                                <div className="text-xs font-semibold text-text-primary">Privacy First</div>
-                                <div className="text-[10px] text-text-muted leading-snug">Keys stored locally in .env</div>
+                    <div className="p-8 pt-4 space-y-6">
+                        {/* Features List */}
+                        <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-slate-50 border border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <Shield size={16} className="text-slate-600" />
+                                <span className="text-xs font-medium text-slate-700">Enterprise Privacy</span>
                             </div>
-                            <div className="flex flex-col gap-2 p-3 rounded-xl bg-surface-raised/50 border border-white/5 hover:bg-surface-raised/80 transition-colors">
-                                <Cpu className="w-5 h-5 text-blue-400" />
-                                <div className="text-xs font-semibold text-text-primary">Dual Engine</div>
-                                <div className="text-[10px] text-text-muted leading-snug">Gemini + Claude support</div>
+                            <div className="flex items-center gap-3">
+                                <Terminal size={16} className="text-slate-600" />
+                                <span className="text-xs font-medium text-slate-700">Local Only</span>
                             </div>
                         </div>
 
                         {/* Input Area */}
-                        <div className="space-y-5">
-                            <div className="space-y-2">
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-medium text-text-secondary">Google Gemini API Key <span className="text-accent">*</span></label>
-                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" className="text-[10px] text-accent hover:underline flex items-center gap-1">
-                                        Get Key <span className="opacity-50">↗</span>
+                                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Gemini API Key</label>
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" className="text-[10px] text-blue-600 hover:underline font-medium">
+                                        Get Key ↗
                                     </a>
                                 </div>
-                                <div className="relative group">
+                                <div className="relative">
                                     <input
                                         type={showGemini ? 'text' : 'password'}
                                         value={geminiKey}
                                         onChange={e => setGeminiKey(e.target.value)}
-                                        placeholder="Enter AI Studio key here"
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 pr-10 text-sm text-text-primary placeholder-text-muted/50 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all font-mono"
+                                        placeholder="Enter Google AI Studio key"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all font-mono"
                                         autoFocus
                                     />
                                     <button
                                         onClick={() => setShowGemini(!showGemini)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text-primary transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
                                     >
-                                        {showGemini ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        {showGemini ? <EyeOff size={14} /> : <Eye size={14} />}
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-medium text-text-secondary">Anthropic Claude API Key <span className="text-text-muted text-xs font-normal">(optional)</span></label>
-                                    <a href="https://console.anthropic.com/" target="_blank" rel="noopener" className="text-[10px] text-accent hover:underline flex items-center gap-1">
-                                        Get Key <span className="opacity-50">↗</span>
+                                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Claude API Key <span className="text-slate-400 font-normal lowercase">(Optional)</span></label>
+                                    <a href="https://console.anthropic.com/" target="_blank" rel="noopener" className="text-[10px] text-blue-600 hover:underline font-medium">
+                                        Get Key ↗
                                     </a>
                                 </div>
-                                <div className="relative group">
+                                <div className="relative">
                                     <input
                                         type={showClaude ? 'text' : 'password'}
                                         value={claudeKey}
                                         onChange={e => setClaudeKey(e.target.value)}
-                                        placeholder="Enter Anthropic key here"
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 pr-10 text-sm text-text-primary placeholder-text-muted/50 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all font-mono"
+                                        placeholder="Enter Anthropic key"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all font-mono"
                                     />
                                     <button
                                         onClick={() => setShowClaude(!showClaude)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text-primary transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
                                     >
-                                        {showClaude ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        {showClaude ? <EyeOff size={14} /> : <Eye size={14} />}
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {error && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-medium flex items-center gap-2 animate-shake">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                            <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-medium flex items-center gap-2">
+                                <span className="w-1 h-3 bg-red-500 rounded-full" />
                                 {error}
                             </div>
                         )}
@@ -134,30 +125,30 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
                         <button
                             onClick={handleContinue}
                             disabled={saving || !geminiKey.trim()}
-                            className="group w-full flex items-center justify-center gap-2 px-6 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-accent/20"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                         >
                             {saving ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    <span>Verifying Configuration...</span>
+                                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span>Configuring...</span>
                                 </>
                             ) : (
                                 <>
-                                    <span>Start Using Middle Manager</span>
-                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    <span>Setup Workspace</span>
+                                    <ArrowRight size={16} />
                                 </>
                             )}
                         </button>
                     </div>
-                </div>
 
-                <div className="mt-6 text-center">
-                    <p className="text-[10px] text-text-muted opacity-60">
-                        By continuing, you acknowledge that this is a local-only tool. <br />
-                        No data is synced to the cloud.
-                    </p>
+                    <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 text-center">
+                        <p className="text-[10px] text-slate-400 font-medium">
+                            Private instance. All execution is local and secure.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
+

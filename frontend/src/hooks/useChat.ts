@@ -9,6 +9,7 @@ interface UseChatReturn {
     sendClarificationResponse: (answers: Record<string, string>) => void;
     sendApproachSelection: (approach: ApproachProposal) => void;
     status: string | null;
+    statusDetail: string | null;
     isConnected: boolean;
     clarificationQuestions: ClarificationQuestion[] | null;
     approachProposals: ApproachProposal[] | null;
@@ -19,6 +20,7 @@ interface UseChatReturn {
 export function useChat(projectId: string | null): UseChatReturn {
     const [messages, setMessages] = useState<Message[]>([]);
     const [status, setStatus] = useState<string | null>(null);
+    const [statusDetail, setStatusDetail] = useState<string | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [clarificationQuestions, setClarificationQuestions] = useState<ClarificationQuestion[] | null>(null);
     const [approachProposals, setApproachProposals] = useState<ApproachProposal[] | null>(null);
@@ -59,6 +61,7 @@ export function useChat(projectId: string | null): UseChatReturn {
                             created_at: new Date().toISOString(),
                         }]);
                         setStatus(null);
+                        setStatusDetail(null);
                         setClarificationQuestions(null);
                         setApproachProposals(null);
                         setApproachContextSummary(null);
@@ -79,6 +82,7 @@ export function useChat(projectId: string | null): UseChatReturn {
 
                     case 'status':
                         setStatus(data.state || null);
+                        setStatusDetail(data.detail || null);
                         break;
 
                     case 'error':
@@ -170,6 +174,7 @@ export function useChat(projectId: string | null): UseChatReturn {
         sendClarificationResponse,
         sendApproachSelection,
         status,
+        statusDetail,
         isConnected,
         clarificationQuestions,
         approachProposals,

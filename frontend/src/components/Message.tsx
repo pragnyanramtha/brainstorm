@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Copy, Check, Eye, ThumbsUp, ThumbsDown, Terminal } from 'lucide-react';
+import { Copy, Check, Eye, ThumbsUp, ThumbsDown, Terminal, ExternalLink, FolderOpen } from 'lucide-react';
 import { DebugPanel } from './DebugPanel';
 import type { Message as MessageType } from '../types';
 
