@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-surface: rgba(9, 9, 11, 0.6);
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-accent/30 selection:text-accent-hover;
+  }
+
+  #root {
+    @apply h-full w-full overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-white/5 border border-white/10;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-xl bg-surface-raised/50 border border-white/5 shadow-xl;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* --- Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-overlay/50 rounded-full transition-colors;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-overlay;
+}
+
+/* --- Markdown Content Styles --- */
+.markdown-content>*+* {
+  margin-top: 1em;
+}
+
+.markdown-content h1 {
+  @apply text-2xl font-bold text-text-primary mt-6 mb-4;
+}
+
+.markdown-content h2 {
+  @apply text-xl font-semibold text-text-primary mt-5 mb-3;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-medium text-text-primary mt-4 mb-2;
+}
+
+.markdown-content p {
+  @apply text-text-secondary leading-relaxed;
+}
+
+.markdown-content ul {
+  @apply list-disc list-outside ml-4 space-y-1 text-text-secondary;
+}
+
+.markdown-content ol {
+  @apply list-decimal list-outside ml-4 space-y-1 text-text-secondary;
+}
+
+.markdown-content li {
+  @apply pl-1;
+}
+
+.markdown-content code {
+  @apply font-mono text-sm bg-accent/10 px-1.5 py-0.5 rounded text-accent-hover border border-accent/10;
+}
+
+.markdown-content pre {
+  @apply my-4 rounded-lg overflow-x-auto bg-surface-raised border border-surface-border p-4;
+}
+
+.markdown-content pre code {
+  @apply block p-0 bg-transparent text-text-secondary border-none;
+}
+
+.markdown-content table {
+  @apply w-full border-collapse my-4;
+}
+
+.markdown-content th {
+  @apply text-left py-2 px-3 border-b border-surface-border font-medium text-text-muted text-xs uppercase tracking-wider;
+}
+
+.markdown-content td {
+  @apply py-2 px-3 border-b border-surface-border text-text-secondary;
+}
+
+.markdown-content blockquote {
+  @apply border-l-2 border-accent pl-4 my-4 italic text-text-muted;
+}
+
+.markdown-content a {
+  @apply text-accent hover:text-accent-hover underline decoration-accent/30 underline-offset-2 transition-colors;
+}
+
+.markdown-content strong {
+  @apply font-semibold text-text-primary;
+}
+
+.markdown-content hr {
+  @apply border-none border-t border-surface-border my-6;
+}
+
+/* --- Animation Classes --- */
+@keyframes typing-dots {
+
+  0%,
+  20% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  80%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+}
+
+.typing-dot {
+  animation: typing-dots 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.transition-smooth {
+  @apply transition-all duration-200 ease-out;
+}
