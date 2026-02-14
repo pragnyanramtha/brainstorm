@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Mic, MicOff, X, Volume2 } from 'lucide-react';
 
-export const VoiceMode = () => {
+export const VoiceMode = ({ className, renderTrigger }: { className?: string, renderTrigger?: (onClick: () => void) => React.ReactNode }) => {
     const [isActive, setIsActive] = useState(false);
     const [status, setStatus] = useState<'idle' | 'listening' | 'speaking' | 'processing'>('idle');
     const websocket = useRef<WebSocket | null>(null);
@@ -211,10 +211,13 @@ export const VoiceMode = () => {
     }, []);
 
     if (!isActive) {
+        if (renderTrigger) {
+            return <>{renderTrigger(startSession)}</>;
+        }
         return (
             <button
                 onClick={startSession}
-                className="fixed bottom-24 right-6 p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all z-50 flex items-center justify-center animate-in zoom-in duration-300"
+                className={className || "fixed bottom-24 right-6 p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all z-50 flex items-center justify-center animate-in zoom-in duration-300"}
                 title="Start Voice Assistant"
             >
                 <Mic size={24} />
@@ -223,42 +226,44 @@ export const VoiceMode = () => {
     }
 
     return (
-        <div className="fixed bottom-24 right-6 z-50 flex flex-col items-center bg-gray-900/90 backdrop-blur-lg border border-gray-700/50 rounded-2xl p-6 shadow-2xl w-72 animate-in slide-in-from-bottom-10 fade-in duration-300">
-            <div className="flex justify-between w-full mb-6 items-center">
-                <span className="text-white font-semibold text-lg tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Gemini Live</span>
-                <button
-                    onClick={stopSession}
-                    className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
-                >
-                    <X size={20} />
-                </button>
-            </div>
+        <>
+            {/* Voice Mode Overlay */}
+            <div className="fixed bottom-24 right-6 z-50 flex flex-col items-center bg-gray-900/90 backdrop-blur-lg border border-gray-700/50 rounded-2xl p-6 shadow-2xl w-72 animate-in slide-in-from-bottom-10 fade-in duration-300">
+                <div className="flex justify-between w-full mb-6 items-center">
+                    <span className="text-white font-semibold text-lg tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Gemini Live</span>
+                    <button
+                        onClick={stopSession}
+                        className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
 
-            <div className={`relative w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-500 ${status === 'listening' ? 'bg-blue-500/20 text-blue-400 ring-2 ring-blue-500/50 ring-offset-2 ring-offset-gray-900' :
-                status === 'speaking' ? 'bg-green-500/20 text-green-400 ring-2 ring-green-500/50 ring-offset-2 ring-offset-gray-900 scale-110' :
-                    'bg-gray-800 text-gray-400'
-                }`}>
-                {/* Ping animation for listening */}
-                {status === 'listening' && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-20 animate-ping"></span>
-                )}
+                <div className={`relative w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-500 ${status === 'listening' ? 'bg-blue-500/20 text-blue-400 ring-2 ring-blue-500/50 ring-offset-2 ring-offset-gray-900' :
+                    status === 'speaking' ? 'bg-green-500/20 text-green-400 ring-2 ring-green-500/50 ring-offset-2 ring-offset-gray-900 scale-110' :
+                        'bg-gray-800 text-gray-400'
+                    }`}>
+                    {/* Ping animation for listening */}
+                    {status === 'listening' && (
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-20 animate-ping"></span>
+                    )}
 
-                {status === 'speaking' ? <Volume2 size={32} /> : <Mic size={32} />}
-            </div>
+                    {status === 'speaking' ? <Volume2 size={32} /> : <Mic size={32} />}
+                </div>
 
-            <div className="text-sm font-medium text-center text-gray-300 min-h-[1.5rem]">
-                {status === 'listening' && (
-                    <span className="animate-pulse">Listening...</span>
-                )}
-                {status === 'speaking' && (
-                    <span className="text-green-400">Speaking...</span>
-                )}
-                {status === 'processing' && "Thinking..."}
-            </div>
+                <div className="text-sm font-medium text-center text-gray-300 min-h-[1.5rem]">
+                    {status === 'listening' && (
+                        <span className="animate-pulse">Listening...</span>
+                    )}
+                    {status === 'speaking' && (
+                        <span className="text-green-400">Speaking...</span>
+                    )}
+                    {status === 'processing' && "Thinking..."}
+                </div>
 
-            <div className="mt-4 text-xs text-gray-500 w-full text-center border-t border-gray-800 pt-3">
-                Say "Create a file called..." or "List files"
+                <div className="mt-4 text-xs text-gray-500 w-full text-center border-t border-gray-800 pt-3">
+                    Say "Create a file called..." or "List files"
+                </div>
             </div>
-        </div>
-    );
+            );
 };

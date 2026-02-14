@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Sparkles, Zap, ArrowUp } from 'lucide-react';
 import { Message as MessageComponent } from './Message';
-import { ClarificationCard } from './ClarificationCard';
+import { ProQuestionnaire } from './ProQuestionnaire';
 import { StatusBar } from './StatusBar';
+import { VoiceMode } from './VoiceMode/VoiceMode';
 import type { Message, ClarificationQuestion } from '../types';
 
 interface ChatAreaProps {
@@ -140,8 +141,9 @@ export function ChatArea({
 
                     {clarificationQuestions && (
                         <div className="animate-slide-up py-4">
-                            <ClarificationCard
+                            <ProQuestionnaire
                                 questions={clarificationQuestions}
+                                lastIntent={lastAssistantMessage?.metadata?.interpreted_intent}
                                 onSubmit={onClarificationResponse}
                             />
                         </div>
@@ -189,6 +191,15 @@ export function ChatArea({
                             <button className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors">
                                 <Paperclip size={18} />
                             </button>
+                            <VoiceMode renderTrigger={(start) => (
+                                <button
+                                    onClick={start}
+                                    className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
+                                    title="Voice Mode"
+                                >
+                                    <Zap size={18} />
+                                </button>
+                            )} />
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || !!status}

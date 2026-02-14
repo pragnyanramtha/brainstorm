@@ -4,16 +4,16 @@ import { useProjects } from './hooks/useProjects';
 import { useChat } from './hooks/useChat';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
-import { FileExplorer } from './components/FileExplorer';
+
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { SettingsModal } from './components/SettingsModal';
-import { VoiceMode } from './components/VoiceMode/VoiceMode';
+
 import type { OnboardingStatus } from './types';
 
 export default function App() {
     const [onboarding, setOnboarding] = useState<OnboardingStatus | null>(null);
     const [showSettings, setShowSettings] = useState(false);
-    const [showFiles, setShowFiles] = useState(true);
+
     const [isLoading, setIsLoading] = useState(true);
 
     const {
@@ -99,13 +99,7 @@ export default function App() {
                     onNewChat={handleNewChat}
                 />
 
-                {/* File Explorer (Overlay or persistent based on width - sticking to persistent for now as per minimal requirment) */}
-                {activeProject && showFiles && (
-                    <FileExplorer
-                        projectPath={activeProject.folder_path}
-                        onClose={() => setShowFiles(false)}
-                    />
-                )}
+                {/* File Explorer Removed as per user request */}
             </main>
 
             {/* Settings Modal */}
@@ -120,7 +114,7 @@ export default function App() {
                 </div>
             )}
 
-            <VoiceMode />
+
         </div>
     );
 }
