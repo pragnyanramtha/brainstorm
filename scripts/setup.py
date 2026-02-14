@@ -82,7 +82,7 @@ def install_frontend_deps():
     """Install frontend dependencies."""
     print("Installing frontend dependencies...")
     subprocess.run(
-        ["npm", "install"],
+        ["pnpm", "install"],
         cwd=str(FRONTEND_DIR),
         check=True,
         shell=True,
@@ -128,7 +128,7 @@ def build_frontend():
     """Build the frontend."""
     print("Building frontend...")
     subprocess.run(
-        ["npm", "run", "build"],
+        ["pnpm", "run", "build"],
         cwd=str(FRONTEND_DIR),
         check=True,
         shell=True,
