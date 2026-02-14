@@ -544,20 +544,22 @@ def select_skills(task_type: str, complexity: int, user: dict) -> list[dict]:
             import asyncio
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            async def _get_skills():
-                async with async_session_factory() as session:
-                    skills = await backend_select_skills(
-                        task_type=task_type,
-                        complexity=complexity,
-                        user_profile=user,
-                        session=session
-                    )
+            try:
+                async def _get_skills():
+                    async with async_session_factory() as session:
+                        skills = await backend_select_skills(
+                            task_type=task_type,
+                            complexity=complexity,
+                            user_profile=user,
+                            session=session
+                        )
+                        return skills
+                skills = loop.run_until_complete(_get_skills())
+                if skills:
+                    console.print("[blue]Using backend skill selection[/blue]")
                     return skills
-            skills = loop.run_until_complete(_get_skills())
-            loop.close()
-            if skills:
-                console.print("[blue]Using backend skill selection[/blue]")
-                return skills
+            finally:
+                loop.close()
         except Exception as e:
             console.print(f"[yellow]Backend skills unavailable ({e}), using fallback[/yellow]")
     
@@ -616,19 +618,21 @@ def select_mcps(task_type: str, intent: str) -> list[dict]:
             import asyncio
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            async def _get_mcps():
-                async with async_session_factory() as session:
-                    mcp_result = await backend_select_mcps(
-                        task_type=task_type,
-                        interpreted_intent=intent,
-                        session=session
-                    )
-                    return mcp_result.get("active", [])
-            mcps = loop.run_until_complete(_get_mcps())
-            loop.close()
-            if mcps:
-                console.print("[blue]Using backend MCP selection[/blue]")
-                return mcps
+            try:
+                async def _get_mcps():
+                    async with async_session_factory() as session:
+                        mcp_result = await backend_select_mcps(
+                            task_type=task_type,
+                            interpreted_intent=intent,
+                            session=session
+                        )
+                        return mcp_result.get("active", [])
+                mcps = loop.run_until_complete(_get_mcps())
+                if mcps:
+                    console.print("[blue]Using backend MCP selection[/blue]")
+                    return mcps
+            finally:
+                loop.close()
         except Exception as e:
             console.print(f"[yellow]Backend MCPs unavailable ({e}), using fallback[/yellow]")
     
@@ -1167,7 +1171,7 @@ def execute_with_gemini_cli(prompt: str, project_dir: Path) -> dict:
     project_dir.mkdir(parents=True, exist_ok=True)
 
     output_log = project_dir / "brainstorm-output.log"
-    prompt_file = project_dir / "brainstorm-prompt.md"
+    prompt_file = project_dir / "gemini.md"
 
     # Write prompt to a file (safer than passing via command line)
     prompt_file.write_text(prompt, encoding="utf-8")
@@ -1299,7 +1303,7 @@ def execute_with_api(prompt: str, project_dir: Path) -> dict:
         content = response.text or ""
 
     # Save prompt and response
-    (project_dir / "brainstorm-prompt.md").write_text(prompt, encoding="utf-8")
+    (project_dir / "gemini.md").write_text(prompt, encoding="utf-8")
     (project_dir / "brainstorm-output.md").write_text(content, encoding="utf-8")
 
     # Extract and write files
@@ -1573,32 +1577,23 @@ def main():
             user,
         )
 
-    # Step 7.6: Select Gemini-Kit agent (if available)
+    # Step 7.6: Select Gemini-Kit agent (auto-enable when available)
     gemini_kit_agent = None
     kit_info = check_gemini_kit()
     
     if kit_info.get("installed") and kit_info.get("built"):
-        console.print(f"[bold #22d3ee]✓ Gemini-Kit detected ({len(kit_info.get('agents', []))} agents)[/]")
+        console.print(f"[bold #22d3ee]✓ Gemini-Kit detected ({len(kit_info.get('agents', []))} agents) - Auto-enabling[/]")
         console.print()
         
-        if questionary.confirm(
-            "Use a specialized Gemini-Kit agent?",
-            default=True,
-            style=PROMPT_STYLE,
-        ).ask():
-            selected_agent = show_gemini_kit_agents()
-            
-            if selected_agent == "auto":
-                gemini_kit_agent = select_gemini_kit_agent(
-                    intake.get("task_type", "code"),
-                    intake.get("interpreted_intent", message),
-                )
-            elif selected_agent and selected_agent != "none":
-                gemini_kit_agent = GEMINI_KIT_AGENTS.get(selected_agent)
-            
-            if gemini_kit_agent:
-                console.print(f"[bold #22c55e]→ Selected: {gemini_kit_agent['emoji']} {gemini_kit_agent['name']}[/]")
-                console.print()
+        # Auto-select agent based on task type
+        gemini_kit_agent = select_gemini_kit_agent(
+            intake.get("task_type", "code"),
+            intake.get("interpreted_intent", message),
+        )
+        
+        if gemini_kit_agent:
+            console.print(f"[bold #22c55e]→ Auto-selected: {gemini_kit_agent['emoji']} {gemini_kit_agent['name']}[/]")
+            console.print()
 
     # Display selections
     console.print(Rule("[bold #7c3aed]Building prompt[/]", style="#4b5563"))
@@ -1706,7 +1701,7 @@ def main():
         ))
 
         # Also save to file
-        prompt_file = project_dir / "brainstorm-prompt.md"
+        prompt_file = project_dir / "gemini.md"
         project_dir.mkdir(parents=True, exist_ok=True)
         prompt_file.write_text(prompt, encoding="utf-8")
         console.print(f"\n[#9ca3af]Prompt saved to: {prompt_file}[/]")
