@@ -73,6 +73,8 @@ app.include_router(projects.router)
 app.include_router(settings.router)
 app.include_router(debug.router)
 app.include_router(feedback.router)
+from backend.routes import voice
+app.include_router(voice.router)
 
 
 # --- Serve frontend ---
