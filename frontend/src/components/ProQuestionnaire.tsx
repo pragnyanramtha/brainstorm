@@ -37,12 +37,12 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
             {/* Context/Intent */}
             {lastIntent && (
                 <div className="flex items-start gap-3 text-xs">
-                    <div className="mt-0.5 p-1 rounded bg-slate-100 text-slate-500">
+                    <div className="mt-0.5 p-1 rounded bg-surface-raised text-muted-foreground">
                         <Target size={12} />
                     </div>
                     <div className="space-y-1">
-                        <span className="font-bold text-slate-400 uppercase tracking-widest text-[10px]">Interpreted Requirements</span>
-                        <p className="text-slate-600 leading-relaxed font-medium">
+                        <span className="font-bold text-muted-foreground uppercase tracking-widest text-[10px]">Interpreted Requirements</span>
+                        <p className="text-foreground leading-relaxed font-medium">
                             {lastIntent}
                         </p>
                     </div>
@@ -50,10 +50,10 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
             )}
 
             {/* Questions Container */}
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-lg">
-                <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                    <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] flex items-center gap-2">
-                        <ClipboardList size={14} className="text-slate-400" />
+            <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-lg">
+                <div className="px-6 py-4 border-b border-border bg-surface-container">
+                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] flex items-center gap-2">
+                        <ClipboardList size={14} className="text-muted-foreground/70" />
                         Configuration Parameters Required
                     </h3>
                 </div>
@@ -61,7 +61,7 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
                 <div className="px-6 py-8 space-y-10">
                     {questions.map((q, idx) => (
                         <div key={idx} className="space-y-4">
-                            <label className="block text-sm font-semibold text-slate-900 tracking-tight">
+                            <label className="block text-sm font-semibold text-foreground tracking-tight">
                                 {q.question}
                             </label>
 
@@ -71,7 +71,7 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
                                     value={answers[q.question] || ''}
                                     onChange={(e) => handleInputChange(q.question, e.target.value)}
                                     placeholder={q.default || "Specify requirements..."}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-slate-400 focus:bg-white text-sm font-medium"
+                                    className="w-full bg-surface-container border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-accent focus:bg-surface text-sm font-medium"
                                 />
 
                                 {q.options && q.options.length > 0 && (
@@ -81,8 +81,8 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
                                                 key={opt}
                                                 onClick={() => handleChipClick(q.question, opt)}
                                                 className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all border uppercase tracking-wider ${answers[q.question] === opt
-                                                    ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
-                                                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-900'
+                                                    ? 'bg-primary border-primary text-primary-foreground shadow-sm'
+                                                    : 'bg-surface border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
                                                     }`}
                                             >
                                                 {opt}
@@ -96,16 +96,16 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <div className="px-6 py-4 bg-surface-container border-t border-border flex items-center justify-between">
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         {remainingCount > 0 ? `${remainingCount} parameters remaining` : 'System configuration complete'}
                     </div>
                     <button
                         onClick={handleSubmit}
                         disabled={!allAnswered && remainingCount > 0}
                         className={`group flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${allAnswered
-                            ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-md active:scale-[0.98]'
-                            : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                            ? 'bg-primary text-primary-foreground hover:bg-primary-hover shadow-md active:scale-[0.98]'
+                            : 'bg-surface-raised text-muted-foreground border border-border cursor-not-allowed'
                             }`}
                     >
                         <span>Apply Parameters</span>
@@ -116,4 +116,3 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
         </div>
     );
 }
-

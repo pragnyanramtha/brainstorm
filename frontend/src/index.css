@@ -6,101 +6,12 @@
 
 @layer base {
   :root {
-    /* Light Mode - Slate Quality */
-    --background: 210 40% 98%;
-    /* Slate 50 */
-    --foreground: 222.2 84% 4.9%;
-    /* Slate 950 */
-
-    --surface: 0 0% 100%;
-    /* White */
-    --surface-container: 210 40% 98%;
-    /* Slate 50 */
-    --surface-raised: 210 40% 96.1%;
-    /* Slate 100 */
-    --surface-raised-high: 214.3 31.8% 91.4%;
-    /* Slate 200 */
-    --surface-overlay: 210 40% 96.1%;
-
-    --primary: 222.2 47.4% 11.2%;
-    /* Slate 900 */
-    --primary-foreground: 210 40% 98%;
-    --primary-hover: 217.2 32.6% 17.5%;
-
-    --secondary: 215.4 16.3% 46.9%;
-    /* Slate 500 */
-    --secondary-muted: 215.3 25% 26.7%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted-foreground: 215.4 16.3% 46.9%;
-    /* Slate 500 */
-
-    --accent: 221.2 83.2% 53.3%;
-    /* Blue 600 */
-    --accent-foreground: 210 40% 98%;
-    --accent-muted: 214.3 94.6% 92%;
-    /* Blue 100 */
-
-    --success: 142.1 76.2% 36.3%;
-    --error: 0 84.2% 60.2%;
-    --warning: 38 92% 50%;
-    --info: 217.2 91.2% 59.8%;
-
-    --border: 214.3 31.8% 91.4%;
-    /* Slate 200 */
-    --input: 214.3 31.8% 91.4%;
-    /* Slate 200 */
-    --ring: 222.2 84% 4.9%;
-    /* Slate 950 */
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    /* Dark Mode - Deep Slate/Zinc */
-    --background: 222.2 84% 4.9%;
-    /* Slate 950 */
-    --foreground: 210 40% 98%;
-    /* Slate 50 */
-
-    --surface: 222.2 84% 6%;
-    /* Slightly lighter than bg */
-    --surface-container: 222.2 84% 4.9%;
-    --surface-raised: 217.2 32.6% 17.5%;
-    /* Slate 900 */
-    --surface-raised-high: 215 27.9% 16.9%;
-    /* Slate 800 */
-    --surface-overlay: 217.2 32.6% 17.5%;
-
-    --primary: 210 40% 98%;
-    /* Slate 50 */
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --primary-hover: 210 40% 96.1%;
-
-    --secondary: 215 20.2% 65.1%;
-    /* Slate 400 */
-    --secondary-muted: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted-foreground: 215 20.2% 65.1%;
-    /* Slate 400 */
-
-    --accent: 217.2 91.2% 59.8%;
-    /* Blue 500 */
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --accent-muted: 217.2 32.6% 17.5%;
-
-    --success: 142.1 70.6% 45.3%;
-    --error: 0 72.2% 50.6%;
-    --warning: 38 92% 50%;
-    --info: 213 94% 68%;
-
-    --border: 217.2 32.6% 17.5%;
-    /* Slate 800 */
-    --input: 217.2 32.6% 17.5%;
-    /* Slate 800 */
-    --ring: 212.7 26.8% 83.9%;
-    /* Slate 300 */
+    /* M3 Dark Elevation (Surface Tints) */
+    --surface-1: #1E1F20;
+    --surface-2: #232426;
+    --surface-3: #28292A;
+    --surface-4: #2D2E30;
+    --surface-5: #323335;
   }
 
   html {
@@ -110,7 +21,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-hidden h-screen selection:bg-accent/30 selection:text-foreground;
+    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-primary/30 selection:text-primary-dim;
   }
 
   #root {
@@ -119,15 +30,26 @@
 }
 
 @layer utilities {
-  .card-clean {
-    @apply bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden;
+
+  /* Material 3 Surface Combinations */
+  .surface-container {
+    @apply bg-surface-container border border-surface-border;
+  }
+
+  .surface-raised {
+    @apply bg-surface-raised border border-surface-border shadow-elevation-1;
+  }
+
+  .glass-card {
+    /* Deprecated but kept for transition - remapping to M3 styles */
+    @apply bg-surface-raised/90 backdrop-blur-sm border border-surface-border shadow-elevation-2;
   }
 }
 
-/* --- Scrollbar Styling --- */
+/* --- Scrollbar Styling (Google Style) --- */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -135,7 +57,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  @apply bg-surface-raised-high/50 border-[3px] border-solid border-transparent bg-clip-content rounded-full transition-colors;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-raised-high;
 }
 
 /* --- Markdown Content Styles --- */
@@ -144,27 +70,27 @@
 }
 
 .markdown-content h1 {
-  @apply text-2xl font-bold text-slate-900 mt-6 mb-4 leading-tight tracking-tight;
+  @apply text-2xl font-medium text-text-primary mt-6 mb-4 leading-tight tracking-tight;
 }
 
 .markdown-content h2 {
-  @apply text-xl font-bold text-slate-900 mt-5 mb-3 tracking-tight;
+  @apply text-xl font-medium text-text-primary mt-5 mb-3 tracking-tight;
 }
 
 .markdown-content h3 {
-  @apply text-lg font-bold text-slate-900 mt-4 mb-2;
+  @apply text-lg font-medium text-text-primary mt-4 mb-2;
 }
 
 .markdown-content p {
-  @apply text-slate-600 leading-7;
+  @apply text-text-secondary leading-7;
 }
 
 .markdown-content ul {
-  @apply list-disc list-outside ml-4 space-y-1 text-slate-600 marker:text-slate-400;
+  @apply list-disc list-outside ml-4 space-y-1 text-text-secondary marker:text-text-muted;
 }
 
 .markdown-content ol {
-  @apply list-decimal list-outside ml-4 space-y-1 text-slate-600 marker:text-slate-400;
+  @apply list-decimal list-outside ml-4 space-y-1 text-text-secondary marker:text-text-muted;
 }
 
 .markdown-content li {
@@ -172,15 +98,15 @@
 }
 
 .markdown-content code {
-  @apply font-mono text-[0.9em] bg-slate-100 px-1.5 py-0.5 rounded text-slate-800 border border-slate-200;
+  @apply font-mono text-[0.9em] bg-surface-raised-high/50 px-1.5 py-0.5 rounded text-text-primary border border-surface-border;
 }
 
 .markdown-content pre {
-  @apply my-4 rounded-lg overflow-x-auto bg-slate-50 border border-slate-200 p-4;
+  @apply my-4 rounded-lg overflow-x-auto bg-surface-container border border-surface-border p-4;
 }
 
 .markdown-content pre code {
-  @apply block p-0 bg-transparent text-slate-700 border-none;
+  @apply block p-0 bg-transparent text-text-secondary border-none;
 }
 
 .markdown-content table {
@@ -188,25 +114,62 @@
 }
 
 .markdown-content th {
-  @apply text-left py-2 px-3 border-b border-slate-200 font-bold text-slate-700 text-xs uppercase tracking-wider bg-slate-50;
+  @apply text-left py-2 px-3 border-b border-surface-border font-medium text-text-secondary text-xs uppercase tracking-wider;
 }
 
 .markdown-content td {
-  @apply py-2 px-3 border-b border-slate-100 text-slate-600;
+  @apply py-2 px-3 border-b border-surface-border text-text-muted;
 }
 
 .markdown-content blockquote {
-  @apply border-l-4 border-slate-200 pl-4 my-4 text-slate-500 italic py-1;
+  @apply border-l-[3px] border-primary/50 pl-4 my-4 text-text-muted italic bg-surface-container/30 py-2 pr-2 rounded-r;
 }
 
 .markdown-content a {
-  @apply text-blue-600 hover:text-blue-700 hover:underline transition-colors font-medium;
+  @apply text-primary hover:text-primary-hover underline decoration-primary/30 underline-offset-2 transition-colors;
 }
 
 .markdown-content strong {
-  @apply font-bold text-slate-900;
+  @apply font-medium text-text-primary;
 }
 
 .markdown-content hr {
-  @apply border-none border-t border-slate-200 my-8;
+  @apply border-none border-t border-surface-border my-8;
+}
+
+/* --- Animation Classes --- */
+@keyframes typing-dots {
+
+  0%,
+  20% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  80%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+}
+
+.typing-dot {
+  animation: typing-dots 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.transition-smooth {
+  @apply transition-all duration-200 ease-out;
 }
