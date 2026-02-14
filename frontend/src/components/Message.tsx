@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Copy, Check, Eye, ThumbsUp, ThumbsDown, Terminal, ExternalLink, FolderOpen } from 'lucide-react';
+import { Copy, Check, Eye, ThumbsUp, ThumbsDown, Terminal, ExternalLink, FolderOpen, User, Activity } from 'lucide-react';
 import { DebugPanel } from './DebugPanel';
 import type { Message as MessageType } from '../types';
 
@@ -21,25 +21,24 @@ function CodeBlock({ children, className }: { children: any; className?: string 
     };
 
     return (
-        <div className="my-4 rounded-xl overflow-hidden border border-surface-border bg-surface-raised/50 group">
+        <div className="my-6 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 shadow-sm group">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+            <div className="flex items-center justify-between px-4 py-2 bg-slate-100/50 border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <Terminal size={14} className="text-text-muted" />
-                    <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">{language || 'text'}</span>
+                    <Terminal size={12} className="text-slate-500" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{language || 'text'}</span>
                 </div>
                 <button
                     onClick={handleCopy}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 text-xs text-text-muted hover:text-text-primary transition-all"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-200 text-[10px] font-bold text-slate-500 hover:text-slate-900 transition-all uppercase tracking-wider"
                 >
-                    {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                    <span className={copied ? 'text-emerald-400' : ''}>{copied ? 'Copied' : 'Copy'}</span>
+                    {copied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                    <span className={copied ? 'text-emerald-600' : ''}>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
             </div>
 
             {/* Code */}
-            <div className="overflow-x-auto p-4 bg-surface-raised font-mono text-sm leading-relaxed text-text-secondary whitespace-pre">
-                {/* We render children directly which is the code text */}
+            <div className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-slate-700">
                 <code>{code}</code>
             </div>
         </div>
@@ -52,23 +51,51 @@ export function Message({ message }: MessageProps) {
     const isAssistant = message.role === 'assistant';
 
     return (
-        <div className={`flex flex-col group ${isUser ? 'items-end' : 'items-start'}`}>
+        <div className={`flex flex-col group ${isUser ? 'items-end' : 'items-start'} max-w-full px-4`}>
 
-            {/* Header/Name (Optional - keep minimal for now) */}
-            <div className={`flex items-center gap-2 mb-1 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                <span className="text-xs font-semibold text-text-primary/70">
-                    {isUser ? 'You' : 'Middle Manager'}
+            {/* Project Info Banner */}
+            {isAssistant && message.metadata?.dev_server_url && (
+                <div className="w-full mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 animate-fade-in shadow-sm">
+                    <div className="flex items-center gap-4 flex-wrap">
+                        {message.metadata.dev_server_url && (
+                            <a
+                                href={message.metadata.dev_server_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-xs text-blue-700 hover:text-blue-800 transition-colors font-semibold"
+                            >
+                                <ExternalLink size={14} />
+                                <span>{message.metadata.dev_server_url}</span>
+                            </a>
+                        )}
+                        {message.metadata.project_dir && (
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <FolderOpen size={12} />
+                                <span>{message.metadata.project_dir}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Header/Name */}
+            <div className={`flex items-center gap-2 mb-1.5 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${isUser ? 'bg-slate-200 text-slate-600' : 'bg-slate-900 text-white shadow-sm'}`}>
+                    {isUser ? <User size={12} /> : <Activity size={12} />}
+                </div>
+                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">
+                    {isUser ? 'User Session' : 'Middle Manager'}
                 </span>
-                <span className="text-[10px] text-text-muted transition-opacity opacity-0 group-hover:opacity-100">
+                <span className="text-[10px] font-medium text-slate-400 transition-opacity opacity-0 group-hover:opacity-100">
                     {new Date(message.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
             </div>
 
-            <div className={`max-w-[85%] sm:max-w-[75%] ${isUser ? '' : 'w-full'}`}>
+            <div className={`max-w-[90%] sm:max-w-[85%] ${isUser ? '' : 'w-full'}`}>
                 <div
-                    className={`relative px-5 py-3.5 text-sm leading-7 shadow-sm transition-all duration-200 ${isUser
-                        ? 'bg-accent text-white rounded-2xl rounded-tr-sm shadow-[0_2px_10px_-2px_rgba(37,99,235,0.2)]'
-                        : 'bg-surface-raised/80 border border-white/5 backdrop-blur-sm text-text-primary rounded-2xl rounded-tl-sm hover:border-white/10'
+                    className={`relative px-5 py-4 text-[14px] leading-relaxed transition-all duration-200 border ${isUser
+                        ? 'bg-slate-900 border-slate-900 text-white rounded-2xl rounded-tr-sm shadow-md'
+                        : 'bg-slate-50 border-slate-200 text-slate-900 rounded-2xl rounded-tl-sm'
                         }`}
                 >
                     {isAssistant ? (
@@ -81,12 +108,11 @@ export function Message({ message }: MessageProps) {
                                         const isInline = !match;
 
                                         if (isInline) {
-                                            return <code className="font-mono text-[0.9em] bg-surface-overlay/50 px-1.5 py-0.5 rounded border border-white/5 text-accent-hover" {...props}>{children}</code>;
+                                            return <code className="font-mono text-[0.9em] bg-slate-200/50 px-1.5 py-0.5 rounded border border-slate-200 text-slate-800" {...props}>{children}</code>;
                                         }
 
                                         return <CodeBlock className={className}>{children}</CodeBlock>;
                                     },
-                                    // Override pre to do nothing since CodeBlock handles the wrapper
                                     pre({ children }) {
                                         return <>{children}</>;
                                     }
@@ -96,28 +122,28 @@ export function Message({ message }: MessageProps) {
                             </ReactMarkdown>
                         </div>
                     ) : (
-                        <div className="whitespace-pre-wrap font-sans">{message.content}</div>
+                        <div className="whitespace-pre-wrap font-medium">{message.content}</div>
                     )}
                 </div>
 
                 {/* Actions Row */}
-                {!isUser && message.metadata && (
-                    <div className="flex items-center gap-3 mt-2 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {!isUser && (
+                    <div className="flex items-center gap-4 mt-2 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                             onClick={() => setShowDebug(!showDebug)}
-                            className={`flex items-center gap-1.5 text-xs transition-colors ${showDebug ? 'text-accent' : 'text-text-muted hover:text-text-primary'}`}
+                            className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${showDebug ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <Eye size={12} />
-                            <span>{showDebug ? 'Hide Prompt' : 'See Prompt'}</span>
+                            <span>{showDebug ? 'Hide Technical Details' : 'View Technical Details'}</span>
                         </button>
 
-                        <div className="h-3 w-px bg-surface-border" />
+                        <div className="h-2 w-px bg-slate-200" />
 
-                        <div className="flex items-center gap-1">
-                            <button className="p-1 text-text-muted hover:text-emerald-400 hover:bg-white/5 rounded transition-all">
+                        <div className="flex items-center gap-2">
+                            <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors">
                                 <ThumbsUp size={12} />
                             </button>
-                            <button className="p-1 text-text-muted hover:text-red-400 hover:bg-white/5 rounded transition-all">
+                            <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors">
                                 <ThumbsDown size={12} />
                             </button>
                         </div>
@@ -126,7 +152,7 @@ export function Message({ message }: MessageProps) {
 
                 {/* Debug Panel */}
                 {showDebug && message.id && (
-                    <div className="mt-4 animate-slide-up origin-top">
+                    <div className="mt-4 border-t border-slate-100 pt-4 animate-slide-up">
                         <DebugPanel messageId={message.id} />
                     </div>
                 )}
@@ -134,3 +160,4 @@ export function Message({ message }: MessageProps) {
         </div>
     );
 }
+

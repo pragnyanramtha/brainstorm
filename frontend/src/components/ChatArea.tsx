@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Sparkles, Zap, ArrowUp } from 'lucide-react';
+import { Send, Paperclip, Activity, Terminal, ArrowUp, Cpu, Layout, HelpCircle } from 'lucide-react';
 import { Message as MessageComponent } from './Message';
 import { ProQuestionnaire } from './ProQuestionnaire';
 import { ApproachCard } from './ApproachCard';
@@ -23,12 +23,12 @@ interface ChatAreaProps {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-    analyzing: 'Understanding request...',
-    clarifying: 'Preparing questions...',
-    brainstorming: 'Exploring approaches...',
-    optimizing: 'Optimizing prompt...',
-    executing: 'Generating response...',
-    scaffolding: 'Building your project...',
+    analyzing: 'Analyzing requirements...',
+    clarifying: 'Configuring parameters...',
+    brainstorming: 'Generating proposals...',
+    optimizing: 'Optimizing context...',
+    executing: 'Processing...',
+    scaffolding: 'Initializing project structure...',
     complete: 'Ready',
 };
 
@@ -43,7 +43,7 @@ export function ChatArea({
 
     // Auto-scroll
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }, [messages, status, clarificationQuestions, approachProposals]);
 
     // Auto-resize
@@ -79,56 +79,58 @@ export function ChatArea({
     // Empty State
     if (!hasProject && messages.length === 0) {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
-                <div className="bg-surface-raised/30 absolute inset-0 -z-10" />
-
-                <div className="max-w-2xl w-full px-6 flex flex-col items-center text-center -mt-20 animate-fade-in">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent-muted flex items-center justify-center mb-8 shadow-glow transition-transform hover:scale-105 duration-500">
-                        <Sparkles className="w-8 h-8 text-white" />
+            <div className="flex-1 flex flex-col items-center justify-center bg-white p-6 relative">
+                <div className="max-w-xl w-full flex flex-col items-center -mt-16 animate-fade-in">
+                    <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center mb-6 shadow-sm">
+                        <Terminal className="w-5 h-5 text-white" />
                     </div>
 
-                    <h1 className="text-3xl font-bold text-white mb-4 tracking-tight text-balance">
-                        What can I build for you?
+                    <h1 className="text-2xl font-semibold text-slate-900 mb-2 tracking-tight">
+                        Start a new conversation
                     </h1>
-                    <p className="text-text-secondary text-lg mb-12 max-w-lg text-balance leading-relaxed">
-                        I'll help you plan, reason, and execute complex tasks using the best AI models for the job.
+                    <p className="text-slate-500 text-sm mb-10 max-w-sm text-center leading-relaxed font-medium">
+                        Describe your technical requirements or project goals to begin a structured workspace session.
                     </p>
 
-                    <div className="w-full relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/50 to-purple-500/50 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity blur" />
-                        <div className="relative bg-surface border border-white/10 rounded-2xl shadow-2xl flex flex-col">
-                            <textarea
-                                ref={textareaRef}
-                                value={input}
-                                onChange={e => setInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Describe your project or task..."
-                                rows={1}
-                                className="w-full bg-transparent border-none rounded-xl px-5 py-4 pr-14 text-text-primary placeholder-text-muted/50 outline-none resize-none text-base leading-relaxed max-h-[200px]"
-                            />
-                            <div className="px-3 pb-3 flex justify-between items-center">
-                                <button className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors">
-                                    <Paperclip size={18} />
+                    <div className="w-full bg-white border border-slate-200 rounded-xl shadow-lg flex flex-col overflow-hidden transition-all focus-within:border-slate-400 focus-within:shadow-xl">
+                        <textarea
+                            ref={textareaRef}
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Message Middle Manager..."
+                            rows={1}
+                            className="w-full bg-transparent border-none px-5 py-4 text-slate-900 placeholder:text-slate-400 outline-none resize-none text-sm leading-relaxed max-h-[200px]"
+                            autoFocus
+                        />
+                        <div className="px-4 pb-3 flex justify-between items-center bg-slate-50/50 border-t border-slate-100/50">
+                            <div className="flex items-center gap-2">
+                                <button className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Attach Files">
+                                    <Paperclip size={16} />
                                 </button>
-                                <button
-                                    onClick={handleSend}
-                                    disabled={!input.trim()}
-                                    className="p-2 rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent/20"
-                                >
-                                    <ArrowUp size={20} />
+                                <button className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Help">
+                                    <HelpCircle size={16} />
                                 </button>
                             </div>
+                            <button
+                                onClick={handleSend}
+                                disabled={!input.trim()}
+                                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                            >
+                                <span>Send Message</span>
+                                <ArrowUp size={14} />
+                            </button>
                         </div>
                     </div>
 
-                    <div className="mt-8 flex gap-4 text-sm text-text-muted">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
-                            <Zap size={14} className="text-yellow-400" />
-                            <span>Gemini + Claude</span>
+                    <div className="mt-10 grid grid-cols-2 gap-3 w-full max-w-md">
+                        <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 text-slate-600">
+                            <Cpu size={14} />
+                            <span className="text-[11px] font-semibold uppercase tracking-wider">Dual Core Logic</span>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
-                            <Sparkles size={14} className="text-purple-400" />
-                            <span>MCP Tools</span>
+                        <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 text-slate-600">
+                            <Layout size={14} />
+                            <span className="text-[11px] font-semibold uppercase tracking-wider">Workspace Sync</span>
                         </div>
                     </div>
                 </div>
@@ -137,18 +139,18 @@ export function ChatArea({
     }
 
     return (
-        <div className="flex-1 flex flex-col min-w-0 bg-surface relative">
+        <div className="flex-1 flex flex-col min-w-0 bg-white relative">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 md:px-0 py-6 scroll-smooth">
-                <div className="max-w-3xl mx-auto space-y-8">
+            <div className="flex-1 overflow-y-auto px-4 md:px-0 py-8 scroll-smooth">
+                <div className="max-w-3xl mx-auto space-y-10">
                     {messages.map((msg, i) => (
-                        <div key={msg.id} className="animate-fade-in" style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}>
+                        <div key={msg.id} className="animate-fade-in">
                             <MessageComponent message={msg} />
                         </div>
                     ))}
 
                     {clarificationQuestions && (
-                        <div className="animate-slide-up py-4">
+                        <div className="animate-slide-up py-4 px-4">
                             <ProQuestionnaire
                                 questions={clarificationQuestions}
                                 lastIntent={lastAssistantMessage?.metadata?.interpreted_intent}
@@ -158,7 +160,7 @@ export function ChatArea({
                     )}
 
                     {approachProposals && approachProposals.length > 0 && (
-                        <div className="animate-slide-up py-4">
+                        <div className="animate-slide-up py-4 px-4">
                             <ApproachCard
                                 approaches={approachProposals}
                                 contextSummary={approachContextSummary}
@@ -168,38 +170,36 @@ export function ChatArea({
                     )}
 
                     {status && status !== 'complete' && (
-                        <div className="flex items-center gap-3 py-4 animate-fade-in pl-4">
-                            <div className="flex gap-1.5">
-                                <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0ms' }} />
-                                <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '150ms' }} />
-                                <div className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <div className="flex items-center gap-4 py-4 px-6 animate-fade-in">
+                            <div className="flex gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse delay-75" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse delay-150" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-text-secondary text-sm font-medium">{STATUS_LABELS[status] || status}</span>
+                                <span className="text-slate-600 text-xs font-semibold uppercase tracking-wider">{STATUS_LABELS[status] || status}</span>
                                 {statusDetail && (
-                                    <span className="text-text-muted text-xs mt-0.5">{statusDetail}</span>
+                                    <span className="text-slate-400 text-[11px] mt-0.5 font-medium">{statusDetail}</span>
                                 )}
                             </div>
                         </div>
                     )}
 
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-4 text-red-200 text-sm animate-fade-in mx-4">
-                            {error}
+                        <div className="bg-red-50 border border-red-100 rounded-xl px-5 py-4 text-red-600 text-sm mx-4 flex items-center gap-3">
+                            <div className="w-1 h-3 bg-red-500 rounded-full" />
+                            <span className="font-medium">{error}</span>
                         </div>
                     )}
 
-                    <div ref={messagesEndRef} className="h-4" />
+                    <div ref={messagesEndRef} className="h-8" />
                 </div>
             </div>
 
             {/* Input Area */}
-            <div className="flex-shrink-0 px-4 pb-6 pt-2">
+            <div className="flex-shrink-0 px-6 pb-8 pt-2">
                 <div className="max-w-3xl mx-auto relative group">
-                    {/* Glass Blur Background */}
-                    <div className="absolute -inset-4 bg-surface/80 backdrop-blur-lg -z-10 bg-gradient-to-t from-surface via-surface to-transparent pointer-events-none" />
-
-                    <div className="relative bg-surface-raised border border-white/10 rounded-2xl shadow-2xl transition-all focus-within:border-accent/30 focus-within:shadow-[0_0_20px_-5px_rgba(37,99,235,0.15)]">
+                    <div className="relative bg-white border border-slate-200 rounded-xl shadow-lg transition-all focus-within:border-slate-400 focus-within:shadow-xl overflow-hidden">
                         <textarea
                             ref={textareaRef}
                             value={input}
@@ -207,36 +207,36 @@ export function ChatArea({
                             onKeyDown={handleKeyDown}
                             placeholder="Message Middle Manager..."
                             rows={1}
-                            className="w-full bg-transparent border-none rounded-xl px-4 py-3.5 pr-24 text-text-primary placeholder-text-muted/60 outline-none resize-none text-sm leading-relaxed max-h-[200px]"
+                            className="w-full bg-transparent border-none px-4 py-3.5 pr-28 text-slate-900 placeholder:text-slate-400 outline-none resize-none text-sm leading-relaxed max-h-[200px]"
                         />
 
-                        <div className="absolute right-2 bottom-2 flex items-center gap-1">
-                            <button className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors">
-                                <Paperclip size={18} />
+                        <div className="absolute right-2 bottom-2 flex items-center gap-1.5">
+                            <button className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Attach Files">
+                                <Paperclip size={16} />
                             </button>
                             <VoiceMode renderTrigger={(start) => (
                                 <button
                                     onClick={start}
-                                    className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
-                                    title="Voice Mode"
+                                    className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                    title="Voice Input"
                                 >
-                                    <Zap size={18} />
+                                    <Activity size={16} />
                                 </button>
                             )} />
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || !!status}
-                                className="p-1.5 rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                className="p-1.5 rounded-md bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
                             >
-                                <ArrowUp size={18} />
+                                <ArrowUp size={16} />
                             </button>
                         </div>
                     </div>
 
                     {/* Status Bar Floating */}
                     {lastAssistantMessage && (
-                        <div className="absolute -top-8 right-0 left-0">
-                            <div className="flex justify-center">
+                        <div className="absolute -top-10 left-0 right-0 flex justify-center pointer-events-none">
+                            <div className="pointer-events-auto">
                                 <StatusBar metadata={lastAssistantMessage.metadata} />
                             </div>
                         </div>
@@ -246,3 +246,4 @@ export function ChatArea({
         </div>
     );
 }
+

@@ -9,6 +9,7 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { SettingsModal } from './components/SettingsModal';
 
 import type { OnboardingStatus } from './types';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 export default function App() {
     const [onboarding, setOnboarding] = useState<OnboardingStatus | null>(null);
@@ -60,10 +61,10 @@ export default function App() {
 
     if (isLoading) {
         return (
-            <div className="h-screen flex items-center justify-center bg-surface w-full overflow-hidden">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin shadow-glow" />
-                    <span className="text-text-secondary text-sm font-medium animate-pulse">Middle Manager AI</span>
+            <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 size={24} className="text-slate-400 animate-spin" />
+                    <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Loading System</span>
                 </div>
             </div>
         );
@@ -75,7 +76,7 @@ export default function App() {
     }
 
     return (
-        <div className="h-screen w-full flex bg-surface overflow-hidden text-text-primary selection:bg-accent/30 selection:text-white">
+        <div className="h-screen w-full flex bg-slate-50 overflow-hidden text-slate-900 selection:bg-slate-200 selection:text-slate-900 font-sans">
             {/* Sidebar with Settings trigger */}
             <Sidebar
                 projects={projects}
@@ -88,7 +89,7 @@ export default function App() {
             />
 
             {/* Main Content Area */}
-            <main className="flex-1 flex min-w-0 relative z-0">
+            <main className="flex-1 flex min-w-0 relative z-0 bg-white">
                 <ChatArea
                     messages={messages}
                     onSendMessage={sendMessage}
@@ -103,8 +104,6 @@ export default function App() {
                     hasProject={!!activeProject}
                     onNewChat={handleNewChat}
                 />
-
-                {/* File Explorer Removed as per user request */}
             </main>
 
             {/* Settings Modal */}
@@ -114,12 +113,12 @@ export default function App() {
 
             {/* Connection Status Indicator (Subtle overlay) */}
             {!isConnected && !isLoading && activeProject && (
-                <div className="fixed top-4 right-4 z-50 bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-full text-xs font-medium animate-pulse backdrop-blur-sm">
-                    Reconnecting...
+                <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 text-red-600 px-3 py-1.5 rounded-md text-xs font-bold shadow-sm flex items-center gap-2">
+                    <Loader2 size={12} className="animate-spin" />
+                    <span>Reconnecting...</span>
                 </div>
             )}
-
-
         </div>
     );
 }
+

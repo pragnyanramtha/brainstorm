@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getDebugInfo } from '../api';
-import { Brain, Zap, Wrench, Target, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Activity, Database, Wrench, Target, ChevronRight, CheckCircle2, AlertCircle, Terminal, Cpu, Layers } from 'lucide-react';
 import type { DebugInfo } from '../types';
 
 interface DebugPanelProps {
@@ -29,39 +29,39 @@ export function DebugPanel({ messageId }: DebugPanelProps) {
 
     if (loading) {
         return (
-            <div className="glass-card rounded-xl p-4 animate-fade-in flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                <span className="text-text-muted text-xs font-medium">Analyzing process trace...</span>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Retrieving Telemetry...</span>
             </div>
         );
     }
 
     if (error || !debug) {
         return (
-            <div className="glass-card rounded-xl p-4 animate-fade-in border-red-500/20 bg-red-500/5 flex items-center gap-2 text-red-400">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2 text-red-600">
                 <AlertCircle size={14} />
-                <span className="text-xs">{error || 'Trace data unavailable'}</span>
+                <span className="text-xs font-medium">{error || 'Trace data unavailable'}</span>
             </div>
         );
     }
 
     return (
-        <div className="glass-card rounded-xl p-5 space-y-6 animate-slide-up text-sm backdrop-blur-2xl">
+        <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-6 shadow-sm text-sm animate-fade-in">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-surface-raised border border-white/10">
-                        <Brain size={14} className="text-accent" />
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                        <Activity size={16} />
                     </div>
                     <div>
-                        <div className="text-xs font-semibold text-text-primary">Reasoning Trace</div>
-                        <div className="text-[10px] text-text-muted">{debug.model_used || 'Unknown Model'}</div>
+                        <div className="text-xs font-bold text-slate-800 uppercase tracking-wider">Execution Telemetry</div>
+                        <div className="text-[10px] font-mono text-slate-500 mt-0.5">{debug.model_used || 'UNKNOWN_MODEL_ID'}</div>
                     </div>
                 </div>
                 {debug.intake_analysis.confidence_score !== undefined && (
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-surface-raised border border-white/5">
-                        <CheckCircle2 size={12} className="text-emerald-400" />
-                        <span className="text-[10px] font-medium text-text-secondary">{debug.intake_analysis.confidence_score}% Confidence</span>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 border border-slate-200">
+                        <CheckCircle2 size={12} className={(debug.intake_analysis.confidence_score || 0) > 80 ? "text-emerald-600" : "text-amber-600"} />
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{debug.intake_analysis.confidence_score}% Match</span>
                     </div>
                 )}
             </div>
@@ -70,31 +70,31 @@ export function DebugPanel({ messageId }: DebugPanelProps) {
                 {/* Intake Analysis */}
                 {debug.intake_analysis.interpreted_intent && (
                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                             <Target size={12} />
-                            <span>Analysis</span>
+                            <span>Request Analysis</span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-surface-raised/50 rounded-lg p-3 border border-white/5">
-                                <span className="text-[10px] text-text-muted block mb-1">Intent</span>
-                                <span className="text-xs text-text-primary font-medium">{debug.intake_analysis.interpreted_intent}</span>
+                            <div className="bg-slate-50 rounded-md p-3 border border-slate-100">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Intent Detected</span>
+                                <span className="text-xs text-slate-700 font-medium leading-relaxed">{debug.intake_analysis.interpreted_intent}</span>
                             </div>
-                            <div className="bg-surface-raised/50 rounded-lg p-3 border border-white/5">
-                                <span className="text-[10px] text-text-muted block mb-1">Task Type</span>
-                                <span className="text-xs text-text-primary font-medium capitalize">{(debug.intake_analysis.task_type || 'Unknown').replace('_', ' ')}</span>
+                            <div className="bg-slate-50 rounded-md p-3 border border-slate-100">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Operation Type</span>
+                                <span className="text-xs text-slate-700 font-mono font-medium capitalize">{(debug.intake_analysis.task_type || 'generic_op').replace('_', ' ')}</span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs">
-                            <span className="text-text-muted">Complexity:</span>
-                            <div className="flex-1 h-1.5 bg-surface-raised rounded-full overflow-hidden">
+                        <div className="flex items-center gap-3 text-xs bg-slate-50 px-3 py-2 rounded-md border border-slate-100">
+                            <span className="text-slate-500 font-medium">Complexity score:</span>
+                            <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-emerald-400 to-accent"
+                                    className="h-full bg-slate-600 rounded-full"
                                     style={{ width: `${((debug.intake_analysis.complexity || 0) / 10) * 100}%` }}
                                 />
                             </div>
-                            <span className="text-text-primary font-mono">{debug.intake_analysis.complexity || 0}/10</span>
+                            <span className="text-slate-700 font-mono font-bold">{debug.intake_analysis.complexity || 0}/10</span>
                         </div>
                     </div>
                 )}
@@ -102,20 +102,20 @@ export function DebugPanel({ messageId }: DebugPanelProps) {
                 {/* Skills & Tools */}
                 {(debug.skills_applied.length > 0 || debug.mcps_used.length > 0) && (
                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wider">
-                            <Wrench size={12} />
-                            <span>Execution</span>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <Cpu size={12} />
+                            <span>System Resources</span>
                         </div>
 
                         <div className="flex flex-wrap gap-2">
                             {debug.skills_applied.map(skill => (
-                                <div key={skill} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-accent/10 border border-accent/20 text-accent text-xs">
-                                    <Zap size={10} />
+                                <div key={skill} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-blue-50 border border-blue-100 text-blue-700 text-[11px] font-semibold uppercase tracking-wide">
+                                    <Layers size={10} />
                                     {skill}
                                 </div>
                             ))}
                             {debug.mcps_used.map(mcp => (
-                                <div key={mcp} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs">
+                                <div key={mcp} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-semibold uppercase tracking-wide">
                                     <Wrench size={10} />
                                     {mcp}
                                 </div>
@@ -127,13 +127,12 @@ export function DebugPanel({ messageId }: DebugPanelProps) {
                 {/* Optimized Prompt */}
                 {debug.optimized_prompt && (
                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wider">
-                            <ChevronRight size={12} />
-                            <span>Optimized Prompt</span>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <Terminal size={12} />
+                            <span>Context Contextualization</span>
                         </div>
                         <div className="relative group">
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-surface-raised/10 pointer-events-none" />
-                            <pre className="glass-card bg-surface-raised/30 p-4 rounded-lg text-[10px] font-mono leading-relaxed text-text-muted overflow-x-auto max-h-[200px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                            <pre className="bg-slate-50 border border-slate-200 p-4 rounded-lg text-[10px] font-mono leading-relaxed text-slate-600 overflow-x-auto max-h-[200px]">
                                 {debug.optimized_prompt}
                             </pre>
                         </div>

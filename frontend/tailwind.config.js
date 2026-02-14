@@ -19,6 +19,7 @@ export default {
                     raised: '#f1f5f9',    // Slate 100
                     'raised-high': '#e2e8f0', // Slate 200
                     border: '#e2e8f0',     // Slate 200
+                    overlay: '#f1f5f9',    // Slate 100 - same as raised for overlay effect
                 },
                 primary: {
                     DEFAULT: '#0f172a', // Slate 900

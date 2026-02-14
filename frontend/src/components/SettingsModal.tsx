@@ -244,7 +244,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                                         <User size={24} className="mx-auto text-text-muted mb-2 opacity-50" />
                                         <p className="text-sm text-text-secondary font-medium">No profile generated yet</p>
                                         <p className="text-xs text-text-muted mt-1 max-w-[200px] mx-auto">
-                                            Start chatting with Middle Manager, and it will automatically learn your preferences.
+                                            Start chatting with Brainstorm AI, and it will automatically learn your preferences.
                                         </p>
                                     </div>
                                 )}
@@ -255,9 +255,9 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                             <div className="space-y-6 animate-fade-in">
                                 <div className="text-center py-4">
                                     <div className="w-16 h-16 bg-gradient-to-br from-accent to-purple-600 rounded-2xl mx-auto flex items-center justify-center shadow-glow mb-4">
-                                        <span className="text-2xl font-bold text-white">MM</span>
+                                        <span className="text-2xl font-bold text-white">BS</span>
                                     </div>
-                                    <h3 className="text-lg font-bold text-text-primary">Middle Manager AI</h3>
+                                    <h3 className="text-lg font-bold text-text-primary">Brainstorm AI</h3>
                                     <p className="text-sm text-text-muted mt-1">Version 0.1.0 • Early Access</p>
                                 </div>
 
@@ -268,7 +268,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                                             Privacy First
                                         </h4>
                                         <p className="text-xs text-text-muted leading-relaxed">
-                                            Middle Manager runs entirely locally. Your code, projects, and conversations never leave your machine except when strictly required to call LLM APIs (Gemini/Claude).
+                                            Brainstorm AI runs entirely locally. Your code, projects, and conversations never leave your machine except when strictly required to call LLM APIs (Gemini/Claude).
                                         </p>
                                     </div>
 
