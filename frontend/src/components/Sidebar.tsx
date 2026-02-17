@@ -121,9 +121,9 @@ export function Sidebar({
                 <button
                     onClick={onNewChat}
                     className={`
-                        flex items-center justify-center gap-2 rounded-lg 
-                        bg-primary text-primary-foreground shadow-sm 
-                        hover:bg-primary-hover transition-all duration-200
+                        flex items-center justify-center gap-2 rounded-xl 
+                        bg-gradient-to-r from-primary to-primary-hover text-primary-foreground shadow-md shadow-primary/20 
+                        hover:opacity-95 transition-all duration-200 active:scale-[0.98]
                         ${collapsed ? 'w-10 h-10 p-0' : 'w-full px-3 py-2.5'}
                     `}
                     title="New Project"
@@ -258,7 +258,7 @@ export function Sidebar({
                         </div>
                         {!collapsed && (
                             <div className="flex-1 text-left min-w-0">
-                                <div className="text-xs font-semibold text-foreground truncate">BrainStrom Ai</div>
+                                <div className="text-xs font-semibold text-foreground truncate">Brainstorm AI</div>
                                 <div className="text-[10px] text-muted-foreground font-medium truncate">Professional Workspace</div>
                             </div>
                         )}

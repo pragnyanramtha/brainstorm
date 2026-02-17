@@ -36,15 +36,20 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center bg-background relative">
-            <div className="max-w-md w-full p-6 animate-scale-in">
-                <div className="bg-surface border border-border shadow-xl rounded-2xl overflow-hidden ring-1 ring-border/50">
+        <div className="h-screen w-full flex items-center justify-center bg-mesh relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
+            </div>
+            <div className="max-w-md w-full p-6 animate-scale-in relative z-10">
+                <div className="bg-surface/95 backdrop-blur-xl border border-border shadow-2xl shadow-primary/5 rounded-2xl overflow-hidden ring-1 ring-border/30">
                     {/* Header */}
                     <div className="p-8 pb-4 text-center">
-                        <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-6 shadow-sm">
-                            <Activity className="w-6 h-6 text-primary-foreground" />
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/20">
+                            <Activity className="w-7 h-7 text-primary-foreground" />
                         </div>
-                        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">Brainstorm AI</h1>
+                        <h1 className="text-2xl font-bold text-foreground mb-2 tracking-tight">Brainstorm AI</h1>
                         <p className="text-muted-foreground text-sm max-w-xs mx-auto leading-relaxed">
                             Professional local middleware for connecting advanced reasoning models to your workflow.
                         </p>
@@ -52,14 +57,18 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
 
                     <div className="p-8 pt-4 space-y-6">
                         {/* Features List */}
-                        <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-surface-container border border-border">
+                        <div className="flex items-center justify-between py-4 px-5 rounded-xl bg-surface-container/80 border border-border/80">
                             <div className="flex items-center gap-3">
-                                <Shield size={16} className="text-muted-foreground" />
-                                <span className="text-xs font-medium text-foreground">Enterprise Privacy</span>
+                                <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
+                                    <Shield size={16} className="text-success" />
+                                </div>
+                                <span className="text-xs font-semibold text-foreground">Enterprise Privacy</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Terminal size={16} className="text-muted-foreground" />
-                                <span className="text-xs font-medium text-foreground">Local Only</span>
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Terminal size={16} className="text-primary" />
+                                </div>
+                                <span className="text-xs font-semibold text-foreground">Local Only</span>
                             </div>
                         </div>
 
@@ -125,7 +134,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
                         <button
                             onClick={handleContinue}
                             disabled={saving || !geminiKey.trim()}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-hover hover:opacity-95 text-primary-foreground rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 active:scale-[0.99]"
                         >
                             {saving ? (
                                 <>

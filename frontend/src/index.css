@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,12 +6,68 @@
 
 @layer base {
   :root {
+    /* Light theme - refined slate/blue palette */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --surface: 0 0 100%;
+    --surface-container: 210 20% 96%;
+    --surface-raised: 210 20% 94%;
+    --surface-raised-high: 214 32% 89%;
+    --surface-border: 214 32% 91%;
+    --surface-overlay: 210 20% 94%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 221 83% 48%;
+    --primary-dim: 221 83% 65%;
+    --secondary: 215 16% 47%;
+    --secondary-muted: 215 16% 57%;
+    --secondary-foreground: 222 47% 11%;
+    --accent: 221 83% 53%;
+    --accent-foreground: 210 40% 98%;
+    --accent-muted: 214 95% 93%;
+    --success: 142 76% 36%;
+    --error: 0 84% 60%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
+    --muted-foreground: 215 16% 47%;
     /* M3 Dark Elevation (Surface Tints) */
     --surface-1: #1E1F20;
     --surface-2: #232426;
     --surface-3: #28292A;
     --surface-4: #2D2E30;
     --surface-5: #323335;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 224 76% 48%;
+    --surface: 222 47% 9%;
+    --surface-container: 222 47% 11%;
+    --surface-raised: 217 33% 14%;
+    --surface-raised-high: 217 33% 18%;
+    --surface-border: 217 33% 17%;
+    --surface-overlay: 217 33% 14%;
+    --primary: 224 76% 48%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 224 76% 55%;
+    --primary-dim: 224 76% 40%;
+    --secondary: 215 20% 55%;
+    --secondary-muted: 215 20% 45%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 224 76% 48%;
+    --accent-foreground: 210 40% 98%;
+    --accent-muted: 224 76% 20%;
+    --success: 142 71% 45%;
+    --error: 0 72% 51%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
+    --muted-foreground: 215 20% 55%;
   }
 
   html {
@@ -21,7 +77,7 @@
   }
 
   body {
-    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-primary/30 selection:text-primary-dim;
+    @apply bg-surface text-text-primary font-sans antialiased overflow-hidden h-screen selection:bg-primary/30 selection:text-foreground;
   }
 
   #root {
@@ -172,4 +228,19 @@
 
 .transition-smooth {
   @apply transition-all duration-200 ease-out;
+}
+
+/* Subtle mesh gradient for empty/hero states */
+.bg-mesh {
+  background-color: hsl(var(--surface));
+  background-image:
+    radial-gradient(at 40% 20%, hsl(var(--primary) / 0.06) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsl(var(--accent) / 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsl(var(--primary) / 0.03) 0px, transparent 50%);
+}
+
+.dark .bg-mesh {
+  background-image:
+    radial-gradient(at 40% 20%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsl(var(--accent) / 0.06) 0px, transparent 50%);
 }

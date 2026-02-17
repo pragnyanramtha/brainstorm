@@ -24,6 +24,7 @@ darkMode: 'class',
                 DEFAULT: "hsl(var(--primary))",
                     foreground: "hsl(var(--primary-foreground))",
                         hover: "hsl(var(--primary-hover))",
+                        dim: "hsl(var(--primary-dim))",
                 },
             secondary: {
                 DEFAULT: "hsl(var(--secondary))",
@@ -49,7 +50,7 @@ darkMode: 'class',
                 }
         },
         fontFamily: {
-            sans: ['"Inter"', 'system-ui', 'sans-serif'],
+            sans: ['"DM Sans"', 'Inter', 'system-ui', 'sans-serif'],
                 mono: ['"JetBrains Mono"', 'monospace'],
             },
         boxShadow: {

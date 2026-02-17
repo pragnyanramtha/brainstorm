@@ -50,7 +50,7 @@ export function ProQuestionnaire({ questions, lastIntent, onSubmit }: ProQuestio
             )}
 
             {/* Questions Container */}
-            <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xl shadow-primary/5">
                 <div className="px-6 py-4 border-b border-border bg-surface-container">
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] flex items-center gap-2">
                         <ClipboardList size={14} className="text-muted-foreground/70" />

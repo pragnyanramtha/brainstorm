@@ -79,20 +79,20 @@ export function ChatArea({
     // Empty State
     if (!hasProject && messages.length === 0) {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center bg-surface p-6 relative">
+            <div className="flex-1 flex flex-col items-center justify-center bg-mesh p-6 relative">
                 <div className="max-w-xl w-full flex flex-col items-center -mt-16 animate-fade-in">
-                    <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-6 shadow-sm">
-                        <Terminal className="w-5 h-5 text-primary-foreground" />
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+                        <Terminal className="w-6 h-6 text-primary-foreground" />
                     </div>
 
-                    <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">
+                    <h1 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
                         Start a new conversation
                     </h1>
-                    <p className="text-muted-foreground text-sm mb-10 max-w-sm text-center leading-relaxed font-medium">
+                    <p className="text-muted-foreground text-sm mb-10 max-w-sm text-center leading-relaxed">
                         Describe your technical requirements or project goals to begin a structured workspace session.
                     </p>
 
-                    <div className="w-full bg-surface border border-border rounded-xl shadow-lg flex flex-col overflow-hidden transition-all focus-within:border-primary/50 focus-within:shadow-xl ring-1 ring-border/50">
+                    <div className="w-full bg-surface/80 backdrop-blur-sm border border-border rounded-2xl shadow-xl shadow-primary/5 flex flex-col overflow-hidden transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2 ring-1 ring-border/30">
                         <textarea
                             ref={textareaRef}
                             value={input}
@@ -115,7 +115,7 @@ export function ChatArea({
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim()}
-                                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary-hover disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary-hover text-primary-foreground text-xs font-semibold hover:opacity-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md shadow-primary/20 active:scale-[0.98]"
                             >
                                 <span>Send Message</span>
                                 <ArrowUp size={14} />
@@ -124,12 +124,16 @@ export function ChatArea({
                     </div>
 
                     <div className="mt-10 grid grid-cols-2 gap-3 w-full max-w-md">
-                        <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-surface-container/50 text-muted-foreground hover:text-foreground transition-colors">
-                            <Cpu size={14} />
+                        <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-surface-container/60 text-muted-foreground hover:text-foreground hover:border-primary/20 hover:bg-surface-raised/50 transition-all cursor-default">
+                            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <Cpu size={16} className="text-primary" />
+                            </div>
                             <span className="text-[11px] font-semibold uppercase tracking-wider">Dual Core Logic</span>
                         </div>
-                        <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-surface-container/50 text-muted-foreground hover:text-foreground transition-colors">
-                            <Layout size={14} />
+                        <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-surface-container/60 text-muted-foreground hover:text-foreground hover:border-primary/20 hover:bg-surface-raised/50 transition-all cursor-default">
+                            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <Layout size={16} className="text-primary" />
+                            </div>
                             <span className="text-[11px] font-semibold uppercase tracking-wider">Workspace Sync</span>
                         </div>
                     </div>
@@ -199,7 +203,7 @@ export function ChatArea({
             {/* Input Area */}
             <div className="flex-shrink-0 px-6 pb-8 pt-2 bg-surface">
                 <div className="max-w-3xl mx-auto relative group">
-                    <div className="flex flex-col bg-surface border border-border rounded-xl shadow-lg transition-all focus-within:border-primary/50 focus-within:shadow-xl overflow-hidden ring-1 ring-border/50">
+                    <div className="flex flex-col bg-surface border border-border rounded-2xl shadow-xl shadow-primary/5 transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2 overflow-hidden ring-1 ring-border/30">
 
                         <textarea
                             ref={textareaRef}
@@ -237,7 +241,7 @@ export function ChatArea({
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || !!status}
-                                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm text-xs font-bold uppercase tracking-wide"
+                                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary-hover text-primary-foreground hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-primary/20 text-xs font-bold uppercase tracking-wide active:scale-[0.98]"
                             >
                                 <span>Send</span>
                                 <ArrowUp size={14} />
