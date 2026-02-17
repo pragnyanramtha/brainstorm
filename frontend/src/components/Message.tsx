@@ -80,8 +80,8 @@ export function Message({ message }: MessageProps) {
 
             {/* Header/Name */}
             <div className={`flex items-center gap-2 mb-1.5 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-5 h-5 rounded-md flex items-center justify-center ${isUser ? 'bg-surface-raised-high text-muted-foreground' : 'bg-primary text-primary-foreground shadow-sm'}`}>
-                    {isUser ? <User size={12} /> : <Activity size={12} />}
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isUser ? 'bg-surface-raised-high text-muted-foreground' : 'bg-gradient-to-br from-primary to-primary-hover text-primary-foreground shadow-md'}`}>
+                    {isUser ? <User size={14} /> : <Activity size={14} />}
                 </div>
                 <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">
                     {isUser ? 'User Session' : 'Brainstorm AI'}
@@ -94,8 +94,8 @@ export function Message({ message }: MessageProps) {
             <div className={`max-w-[90%] sm:max-w-[85%] ${isUser ? '' : 'w-full'}`}>
                 <div
                     className={`relative px-5 py-4 text-[14px] leading-relaxed transition-all duration-200 border ${isUser
-                        ? 'bg-primary border-primary text-primary-foreground rounded-2xl rounded-tr-sm shadow-md'
-                        : 'bg-surface border-border text-foreground rounded-2xl rounded-tl-sm'
+                        ? 'bg-gradient-to-br from-primary to-primary-hover border-primary/80 text-primary-foreground rounded-2xl rounded-tr-sm shadow-lg shadow-primary/15'
+                        : 'bg-surface border-border text-foreground rounded-2xl rounded-tl-sm shadow-sm'
                         }`}
                 >
                     {isAssistant ? (

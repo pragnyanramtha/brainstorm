@@ -61,10 +61,10 @@ export default function App() {
 
     if (isLoading) {
         return (
-            <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+            <div className="h-screen w-full flex items-center justify-center bg-mesh">
                 <div className="flex flex-col items-center gap-3">
-                    <Loader2 size={24} className="text-slate-400 animate-spin" />
-                    <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Loading System</span>
+                    <Loader2 size={28} className="text-primary animate-spin" />
+                    <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Loading System</span>
                 </div>
             </div>
         );

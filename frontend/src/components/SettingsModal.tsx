@@ -59,7 +59,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
             <div className="absolute inset-0 bg-background/50 backdrop-blur-sm animate-fade-in" />
 
             <div
-                className="relative bg-surface border border-border rounded-lg w-full max-w-2xl flex flex-col shadow-xl animate-scale-in overflow-hidden ring-1 ring-border/50"
+                className="relative bg-surface border border-border rounded-2xl w-full max-w-2xl flex flex-col shadow-2xl shadow-primary/5 animate-scale-in overflow-hidden ring-1 ring-border/30"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
@@ -176,7 +176,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                                     <button
                                         onClick={handleSaveKeys}
                                         disabled={saving || (!geminiKey && !claudeKey)}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary-hover hover:opacity-95 text-primary-foreground rounded-xl text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20 active:scale-[0.98]"
                                     >
                                         {saving ? <div className="w-3 h-3 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
                                         {saving ? 'Verifying...' : saved ? 'Configuration Saved' : 'Save Configuration'}
